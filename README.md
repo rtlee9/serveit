@@ -1,4 +1,5 @@
 # ServeIt
+[![Build Status](https://travis-ci.org/rtlee9/serveit.svg?branch=master)](https://travis-ci.org/rtlee9/serveit)
 [![PyPI version](https://badge.fury.io/py/ServeIt.svg)](https://badge.fury.io/py/ServeIt)
 [![Python 2.7](https://img.shields.io/badge/python-2.7-blue.svg)](#installation-python-27-and-python-36)
 [![Python 3.7](https://img.shields.io/badge/python-3.6-blue.svg)](#installation-python-27-and-python-36)
