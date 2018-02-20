@@ -4,6 +4,7 @@ from flask_restful import Resource, Api
 
 from .config import WSGI_OPTIONS
 from .wsgi import StandaloneApplication
+from .utils import make_serializable
 
 
 class PredictionServer(object):
@@ -40,11 +41,8 @@ class PredictionServer(object):
 
     def create_info_endpoint(self, name, data):
         """Create an endpoint to serve info GET requests."""
-        # try converting numpy values to lists
-        try:
-            data = data.tolist()
-        except AttributeError:
-            pass
+        # make sure data is serializable
+        data = make_serializable(data)
 
         # create generic restful resource to serve static JSON data
         class InfoBase(Resource):

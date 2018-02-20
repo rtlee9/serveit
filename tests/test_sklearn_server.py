@@ -103,5 +103,15 @@ class SvcTest(unittest.TestCase, SklearnServerTest):
         self.clf = SVC()
         super(SvcTest, self)._setup()
 
+
+class RandomForestTest(unittest.TestCase, SklearnServerTest):
+    """Test RandomForestClassifier with LogisticRegression."""
+
+    def setUp(self):
+        """Unittest set up."""
+        from sklearn.ensemble import RandomForestClassifier
+        self.clf = RandomForestClassifier()
+        super(RandomForestTest, self)._setup()
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,8 @@
 """SkLearn model serving."""
 from flask_restful import Resource
+
 from .prediction_server import PredictionServer
+from .utils import make_serializable
 
 
 class SklearnServer(PredictionServer):
@@ -19,17 +21,15 @@ class SklearnServer(PredictionServer):
         """Create an endpoint to serve info GET requests."""
         model = self.model
 
+        # parse model details
+        model_details = {}
+        for key, value in model.__dict__.items():
+            model_details[key] = make_serializable(value)
+
         # create generic restful resource to serve model information as JSON
         class ModelInfo(Resource):
             def get(self):
-                details = {}
-                for key, value in model.__dict__.items():
-                    try:
-                        # try converting numpy values to lists
-                        details[key] = value.tolist()
-                    except AttributeError:
-                        details[key] = value
-                return details
+                return model_details
 
         self.api.add_resource(ModelInfo, '/info/model')
 
