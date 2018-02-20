@@ -38,6 +38,22 @@ class PredictionServer(object):
         # map resource to endpoint
         self.api.add_resource(Predictions, '/predictions')
 
+    def create_info_endpoint(self, name, data):
+        """Create an endpoint to serve info GET requests."""
+        # create generic restful resource to serve static JSON data
+        class InfoBase(Resource):
+            def get(self):
+                return data
+
+        def info_factory(name):
+            """Return an Info derivative resource."""
+            class NewClass(InfoBase):
+                pass
+            NewClass.__name__ = "{}_{}".format(name, InfoBase.__name__)
+            return NewClass
+
+        self.api.add_resource(info_factory(name), '/info/{}'.format(name))
+
     def serve(self):
         """Serve predictions as an API endpoint."""
         self.server = StandaloneApplication(self.app, WSGI_OPTIONS).run()

@@ -33,22 +33,6 @@ class SklearnServer(PredictionServer):
 
         self.api.add_resource(ModelInfo, '/info/model')
 
-    def create_info_endpoint(self, name, data):
-        """Create an endpoint to serve info GET requests."""
-        # create generic restful resource to serve static JSON data
-        class InfoBase(Resource):
-            def get(self):
-                return data
-
-        def info_factory(name):
-            """Return an Info derivative resource."""
-            class NewClass(InfoBase):
-                pass
-            NewClass.__name__ = "{}_{}".format(name, InfoBase.__name__)
-            return NewClass
-
-        self.api.add_resource(info_factory(name), '/info/{}'.format(name))
-
 
 if __name__ == '__main__':
     from sklearn.datasets import load_iris
