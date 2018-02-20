@@ -5,17 +5,15 @@ import json
 from serveit.sklearn_server import SklearnServer
 
 
-class SklearnServerTest(unittest.TestCase):
+class SklearnServerTest():
     """Test SklearnServer."""
 
-    def setUp(self):
+    def _setup(self):
         """Unittest set up."""
         from sklearn.datasets import load_iris
-        from sklearn.linear_model import LogisticRegression
         self.data = load_iris()
-        clf = LogisticRegression()
-        clf.fit(self.data.data, self.data.target)
-        self.sklearn_server = SklearnServer(clf, clf.predict)
+        self.clf.fit(self.data.data, self.data.target)
+        self.sklearn_server = SklearnServer(self.clf, self.clf.predict)
         self.app = self.sklearn_server.app.test_client()
 
     def test_model_info_none(self):
@@ -30,7 +28,7 @@ class SklearnServerTest(unittest.TestCase):
         response = app.get('/info/model')
         response_data = json.loads(response.get_data())
         self.assertGreater(len(response_data), 3)
-        expected_keys = ['classes_', 'coef_']
+        expected_keys = ['classes_']
         for key in expected_keys:
             self.assertIn(key, response_data)
 
@@ -85,6 +83,25 @@ class SklearnServerTest(unittest.TestCase):
         for prediction in response_data:
             self.assertIn(prediction, self.data.target)
 
+
+class LogisticRegressionTest(unittest.TestCase, SklearnServerTest):
+    """Test SklearnServer with LogisticRegression."""
+
+    def setUp(self):
+        """Unittest set up."""
+        from sklearn.linear_model import LogisticRegression
+        self.clf = LogisticRegression()
+        super(LogisticRegressionTest, self)._setup()
+
+
+class SvcTest(unittest.TestCase, SklearnServerTest):
+    """Test SVC with LogisticRegression."""
+
+    def setUp(self):
+        """Unittest set up."""
+        from sklearn.svm import SVC
+        self.clf = SVC()
+        super(SvcTest, self)._setup()
 
 if __name__ == '__main__':
     unittest.main()
