@@ -2,6 +2,9 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
 
+from .config import WSGI_OPTIONS
+from .wsgi import StandaloneApplication
+
 
 class PredictionServer(object):
     """Easy deploy class."""
@@ -37,4 +40,4 @@ class PredictionServer(object):
 
     def serve(self):
         """Serve predictions as an API endpoint."""
-        self.app.run()
+        self.server = StandaloneApplication(self.app, WSGI_OPTIONS).run()
