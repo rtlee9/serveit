@@ -40,6 +40,12 @@ class PredictionServer(object):
 
     def create_info_endpoint(self, name, data):
         """Create an endpoint to serve info GET requests."""
+        # try converting numpy values to lists
+        try:
+            data = data.tolist()
+        except AttributeError:
+            pass
+
         # create generic restful resource to serve static JSON data
         class InfoBase(Resource):
             def get(self):
