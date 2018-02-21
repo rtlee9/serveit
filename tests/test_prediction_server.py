@@ -1,6 +1,7 @@
 """Test PredictionServer."""
 import unittest
 import json
+import numpy as np
 from sklearn.datasets import load_iris, load_boston
 
 from serveit.sklearn_server import PredictionServer
@@ -61,16 +62,13 @@ class PredictionServerTest(object):
 
     def test_predictions(self):
         """Test predictions endpoint."""
-        sample_data = [
-            [5.1, 3.5, 1.4, 0.2],
-            [4.9, 3., 1.4, 0.2],
-            [4.7, 3.2, 1.3, 0.2],
-            [4.6, 3.1, 1.5, 0.2],
-            [5., 3.6, 1.4, 0.2],
-            [5.4, 3.9, 1.7, 0.4],
-            [4.6, 3.4, 1.4, 0.3],
-        ]
-        response = self.app.post('/predictions', headers={'Content-Type': 'application/json'}, data=json.dumps(sample_data))
+        sample_idx = np.random.randint(self.data.data.shape[0], size=10)
+        sample_data = self.data.data[sample_idx, :]
+        response = self.app.post(
+            '/predictions',
+            headers={'Content-Type': 'application/json'},
+            data=json.dumps(sample_data.tolist()),
+        )
         response_data = json.loads(response.get_data())
         self.assertEqual(len(response_data), len(sample_data))
         for prediction in response_data:
