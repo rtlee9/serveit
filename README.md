@@ -15,30 +15,35 @@ ServeIt deploys your trained models to a RESTful API for prediction serving. Cur
 
 ## Installation: Python 2.7 and Python 3.6
 * PyPi: `pip install serveit`
-* source: `git clone https://github.com/rtlee9/serveit.git && cd serveit && pip install -e .`  # WIP
+* source: `git clone https://github.com/rtlee9/serveit.git && cd serveit && pip install -e .`
 
 ## Supported libraries
 * Scikit-Learn
 
+Fit Scikit-Learn model:
 ```python
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
-from serveit.sklearn_server import SklearnServer
 
 # fit a model on the Iris dataset
 data = load_iris()
 reg = LogisticRegression()
 reg.fit(data.data, data.target)
+```
 
-# deploy model to a SkLearnServer
+Serve your trained model:
+```python
+from serveit.sklearn_server import SklearnServer
+
+# initialize server
 sklearn_server = SklearnServer(reg, reg.predict)
 
-# add informational endpoints
+# add (optional) informational endpoints
 sklearn_server.create_model_info_endpoint()
 sklearn_server.create_info_endpoint('features', data.feature_names)
 sklearn_server.create_info_endpoint('target_labels', data.target_names.tolist())
 
-# start API
+# start serving predictions from API
 sklearn_server.serve()
 ```
 
