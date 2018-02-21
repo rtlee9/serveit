@@ -10,15 +10,15 @@ from test_prediction_server import PredictionServerTest
 class SklearnServerTest(PredictionServerTest, object):
     """Base class to test the Scikit-Learn server.
 
-    SklearnServerTest should be inherited by a class that has a sklearn `clf`
-    classifier attribute, and calls `SklearnServerTest._setup()` after instantiation.
+    SklearnServerTest should be inherited by a class that has a sklearn `model`
+    attribute, and calls `SklearnServerTest._setup()` after instantiation.
     That class should also inherit from `unittest.TestCase` to ensure tests are executed.
     """
 
     def _setup(self, data):
         """Set up method to be called before each unit test."""
-        super(SklearnServerTest, self)._setup(self.clf.fit, data)
-        self.sklearn_server = SklearnServer(self.clf, self.clf.predict)
+        super(SklearnServerTest, self)._setup(self.model.fit, data)
+        self.sklearn_server = SklearnServer(self.model, self.model.predict)
         self.app = self.sklearn_server.app.test_client()
 
     def test_model_info_none(self):
@@ -44,7 +44,7 @@ class IrisLogisticRegressionTest(unittest.TestCase, SklearnServerTest):
     def setUp(self):
         """Unittest set up."""
         from sklearn.linear_model import LogisticRegression
-        self.clf = LogisticRegression()
+        self.model = LogisticRegression()
         super(IrisLogisticRegressionTest, self)._setup(load_iris())
 
 
@@ -54,7 +54,7 @@ class IrisSvcTest(unittest.TestCase, SklearnServerTest):
     def setUp(self):
         """Unittest set up."""
         from sklearn.svm import SVC
-        self.clf = SVC()
+        self.model = SVC()
         super(IrisSvcTest, self)._setup(load_iris())
 
 
@@ -64,7 +64,7 @@ class IrisRandomForestTest(unittest.TestCase, SklearnServerTest):
     def setUp(self):
         """Unittest set up."""
         from sklearn.ensemble import RandomForestClassifier
-        self.clf = RandomForestClassifier()
+        self.model = RandomForestClassifier()
         super(IrisRandomForestTest, self)._setup(load_iris())
 
 if __name__ == '__main__':
