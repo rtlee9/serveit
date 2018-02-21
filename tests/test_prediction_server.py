@@ -6,7 +6,7 @@ from sklearn.datasets import load_iris, load_boston
 from serveit.sklearn_server import PredictionServer
 
 
-class PredictionServerTest():
+class PredictionServerTest(object):
     """Base class to test the prediction server.
 
     PredictionServerTest should be inherited by a class that has a `clf` classifier

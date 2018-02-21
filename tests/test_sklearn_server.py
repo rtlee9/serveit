@@ -7,7 +7,7 @@ from serveit.sklearn_server import SklearnServer
 from test_prediction_server import PredictionServerTest
 
 
-class SklearnServerTest(PredictionServerTest):
+class SklearnServerTest(PredictionServerTest, object):
     """Base class to test the Scikit-Learn server.
 
     SklearnServerTest should be inherited by a class that has a sklearn `clf`
