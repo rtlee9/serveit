@@ -6,7 +6,11 @@ from .utils import make_serializable
 
 
 class SklearnServer(PredictionServer):
-    """Scikit-Learn server."""
+    """Deploys any Scikit-Learn model prediction method to an API endpoint.
+
+    Also provides methods to support the creation of new endpoints to
+    provide information about the model, expected features, and targets.
+    """
 
     def __init__(self, model, predict):
         """Initialize class with model and prediction function."""

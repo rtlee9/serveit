@@ -6,10 +6,15 @@ from serveit.sklearn_server import SklearnServer
 
 
 class SklearnServerTest():
-    """Test SklearnServer."""
+    """Base class to test the Scikit-Learn server.
+
+    SklearnServerTest should be inherited by a class that has a sklearn `clf`
+    classifier attribute, and calls `SklearnServerTest._setup()` after instantiation.
+    That class should also inherit from `unittest.TestCase` to ensure tests are executed.
+    """
 
     def _setup(self):
-        """Unittest set up."""
+        """Set up method to be called before each unit test."""
         from sklearn.datasets import load_iris
         self.data = load_iris()
         self.clf.fit(self.data.data, self.data.target)
@@ -95,7 +100,7 @@ class LogisticRegressionTest(unittest.TestCase, SklearnServerTest):
 
 
 class SvcTest(unittest.TestCase, SklearnServerTest):
-    """Test SVC with LogisticRegression."""
+    """Test SklearnServer with SVC."""
 
     def setUp(self):
         """Unittest set up."""
@@ -105,7 +110,7 @@ class SvcTest(unittest.TestCase, SklearnServerTest):
 
 
 class RandomForestTest(unittest.TestCase, SklearnServerTest):
-    """Test RandomForestClassifier with LogisticRegression."""
+    """Test SklearnServer with RandomForestClassifier."""
 
     def setUp(self):
         """Unittest set up."""
