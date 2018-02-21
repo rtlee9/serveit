@@ -1,6 +1,7 @@
 """Test PredictionServer."""
 import unittest
 import json
+from sklearn.datasets import load_iris, load_boston
 
 from serveit.sklearn_server import PredictionServer
 
@@ -13,14 +14,13 @@ class PredictionServerTest():
     That class should also inherit from `unittest.TestCase` to ensure tests are executed.
     """
 
-    def _setup(self, fit):
+    def _setup(self, fit, data):
         """Set up method to be called before each unit test.
 
         Arguments:
             - fit (callable): model training method; must accept args (data, target)
         """
-        from sklearn.datasets import load_iris
-        self.data = load_iris()
+        self.data = data
         fit(self.data.data, self.data.target)
         self.sklearn_server = PredictionServer(self.clf.predict)
         self.app = self.sklearn_server.app.test_client()
@@ -77,34 +77,35 @@ class PredictionServerTest():
             self.assertIn(prediction, self.data.target)
 
 
-class LogisticRegressionTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with LogisticRegression."""
+class IrisLogisticRegressionTest(unittest.TestCase, PredictionServerTest):
+    """Test PredictionServer with LogisticRegression fitted on iris data."""
 
     def setUp(self):
         """Unittest set up."""
         from sklearn.linear_model import LogisticRegression
         self.clf = LogisticRegression()
-        super(LogisticRegressionTest, self)._setup(self.clf.fit)
+        super(IrisLogisticRegressionTest, self)._setup(self.clf.fit, load_iris())
 
 
-class SvcTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with SVC."""
+class IrisSvcTest(unittest.TestCase, PredictionServerTest):
+    """Test PredictionServer with SVC fitted on iris data."""
 
     def setUp(self):
         """Unittest set up."""
         from sklearn.svm import SVC
         self.clf = SVC()
-        super(SvcTest, self)._setup(self.clf.fit)
+        super(IrisSvcTest, self)._setup(self.clf.fit, load_iris())
 
 
-class RandomForestTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with RandomForestClassifier."""
+class IrisRandomForestTest(unittest.TestCase, PredictionServerTest):
+    """Test PredictionServer with RandomForestClassifier fitted on iris data."""
 
     def setUp(self):
         """Unittest set up."""
         from sklearn.ensemble import RandomForestClassifier
         self.clf = RandomForestClassifier()
-        super(RandomForestTest, self)._setup(self.clf.fit)
+        super(IrisRandomForestTest, self)._setup(self.clf.fit, load_iris())
+
 
 if __name__ == '__main__':
     unittest.main()
