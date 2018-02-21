@@ -21,7 +21,7 @@ class SklearnServer(PredictionServer):
         """String representation."""
         return '<EasyDeploySklearn: {}>'.format(self.model)
 
-    def create_model_info_endpoint(self):
+    def create_model_info_endpoint(self, path='/info/model'):
         """Create an endpoint to serve info GET requests."""
         model = self.model
 
@@ -35,7 +35,7 @@ class SklearnServer(PredictionServer):
             def get(self):
                 return model_details
 
-        self.api.add_resource(ModelInfo, '/info/model')
+        self.api.add_resource(ModelInfo, path)
 
 
 if __name__ == '__main__':
