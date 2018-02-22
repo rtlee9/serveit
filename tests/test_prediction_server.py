@@ -90,3 +90,46 @@ class PredictionServerTest(object):
             # TODO: remove variance from this test (i.e., no chance of false negative)
             pred_pct_diff = np.array(response_data).mean() / self.data.target.mean() - 1
             self.assertAlmostEqual(pred_pct_diff / 1e4, 0, places=1)
+
+    def test_input_validation(self):
+        """Add simple input validator and make sure it triggers."""
+        # model input validator
+        def feature_count_check(data):
+            # check num dims
+            if data.ndim != 2:
+                return False, 'Data should have two dimensions.'
+            # check number of columns
+            if data.shape[1] != self.data.data.shape[1]:
+                reason = '{} features required, {} features provided'.format(
+                    data.shape[1], self.data.data.shape[1])
+                return False, reason
+            # validation passed
+            return True, None
+
+        # set up test server
+        sklearn_server = PredictionServer(self.model.predict, feature_count_check)
+        app = sklearn_server.app.test_client()
+
+        # generate sample data
+        sample_idx = np.random.randint(self.data.data.shape[0], size=100)
+        sample_data = self.data.data[sample_idx, :]
+
+        # post good data, verify 200 response
+        response = app.post(
+            '/predictions',
+            headers={'Content-Type': 'application/json'},
+            data=json.dumps(sample_data.tolist()),
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # post bad data (drop a single column), verify 400 response
+        response = app.post(
+            '/predictions',
+            headers={'Content-Type': 'application/json'},
+            data=json.dumps(sample_data[:, :-1].tolist()),
+        )
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.get_data())
+        expected_reason = '{} features required, {} features provided'.format(
+            self.data.data.shape[1] - 1, self.data.data.shape[1])
+        self.assertIn(expected_reason, response_data['message'])

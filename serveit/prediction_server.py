@@ -13,20 +13,32 @@ logger = get_logger(__name__)
 class PredictionServer(object):
     """Easy deploy class."""
 
-    def __init__(self, predict):
-        """Initialize class with prediction function."""
+    def __init__(self, predict, input_validation=lambda data: (True, None)):
+        """Initialize class with prediction function.
+
+        Arguments:
+            - predict (fn): function that takes a numpy array of features as input,
+                and returns a prediction of targets
+            - input_validation (fn): takes a numpy array as input;
+                returns True if validation passes and False otherwise
+        """
         self.predict = predict
         self.app = Flask('{}_{}'.format(self.__class__.__name__, type(predict).__name__))
         self.api = Api(self.app, catch_all_404s=True)
-        self._create_prediction_endpoint()
+        self._create_prediction_endpoint(input_validation)
         self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
 
     def __repr__(self):
         """String representation."""
         return '<PredictionsServer: {}>'.format(type(self.predict).__name__)
 
-    def _create_prediction_endpoint(self):
-        """Create an endpoint to serve predictions."""
+    def _create_prediction_endpoint(self, input_validation=lambda data: (True, None)):
+        """Create an endpoint to serve predictions.
+
+        Arguments:
+            - input_validation (fn): takes a numpy array as input;
+                returns True if validation passes and False otherwise
+        """
         # copy instance variables to local scope for resource class
         predict = self.predict
         logger = self.app.logger
@@ -34,10 +46,25 @@ class PredictionServer(object):
         # create restful resource
         class Predictions(Resource):
             def post(self):
+                # parse request data
                 data = request.get_json()
                 logger.debug('Received JSON data of length {:,}'.format(len(data)))
+
+                # convert to numpy array
                 data = np.array(data)
                 logger.debug('Converted JSON data to Numpy array with shape {}'.format(data.shape))
+
+                # sanity check using user defined callback (default is no check)
+                validation_pass, validation_reason = input_validation(data)
+                if not validation_pass:
+                    # if validation fails, log the reason code, log the data, and send a 400 response
+                    validation_message = 'Input validation failed with reason: {}'.format(validation_reason)
+                    logger.error(validation_message)
+                    logger.debug('Data: {}'.format(data))
+                    response = jsonify(dict(message=validation_message))
+                    response.status_code = 400
+                    return response
+
                 try:
                     prediction = predict(data)
                 except Exception as e:
