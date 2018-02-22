@@ -12,9 +12,9 @@ class SklearnServer(PredictionServer):
     provide information about the model, expected features, and targets.
     """
 
-    def __init__(self, model, predict):
+    def __init__(self, model, *args, **kwargs):
         """Initialize class with model and prediction function."""
-        super(SklearnServer, self).__init__(predict)
+        super(SklearnServer, self).__init__(*args, **kwargs)
         self.model = model
 
     def __repr__(self):
