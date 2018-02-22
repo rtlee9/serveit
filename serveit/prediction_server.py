@@ -17,7 +17,7 @@ class PredictionServer(object):
         """Initialize class with prediction function."""
         self.predict = predict
         self.app = Flask('{}_{}'.format(self.__class__.__name__, type(predict).__name__))
-        self.api = Api(self.app)
+        self.api = Api(self.app, catch_all_404s=True)
         self._create_prediction_endpoint()
         self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
 
