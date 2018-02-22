@@ -12,7 +12,7 @@ class BostonKerasNNTest(unittest.TestCase, PredictionServerTest):
         """Unittest set up."""
         data = load_boston()
         self.model = self.get_model(data.data.shape[1])
-        super(BostonKerasNNTest, self)._setup(lambda X, y: None, data)
+        super(BostonKerasNNTest, self)._setup(self.model.fit, data)
 
     def get_model(self, input_dim):
         """Create and compile simple model."""
