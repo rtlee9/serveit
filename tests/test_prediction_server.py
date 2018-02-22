@@ -24,6 +24,15 @@ class PredictionServerTest(object):
         self.sklearn_server = PredictionServer(self.model.predict)
         self.app = self.sklearn_server.app.test_client()
 
+    def test_404_media(self):
+        """Make sure API serves 404 response with JSON."""
+        response = self.app.get('/fake-endpoint')
+        self.assertEqual(response.status_code, 404)
+        response_data_raw = response.get_data()
+        self.assertIsNotNone(response_data_raw)
+        response_data = json.loads(response_data_raw)
+        self.assertGreater(len(response_data), 0)
+
     def test_features_info_none(self):
         """Verify 404 response if '/info/features' endpoint not yet created."""
         response = self.app.get('/info/features')

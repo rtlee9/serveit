@@ -1,10 +1,13 @@
 """Base class for serving predictions."""
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 import numpy as np
 from meinheld import server, middleware
 
 from .utils import make_serializable
+from .log_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class PredictionServer(object):
@@ -14,8 +17,9 @@ class PredictionServer(object):
         """Initialize class with prediction function."""
         self.predict = predict
         self.app = Flask('{}_{}'.format(self.__class__.__name__, type(predict).__name__))
-        self.api = Api(self.app)
+        self.api = Api(self.app, catch_all_404s=True)
         self._create_prediction_endpoint()
+        self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
 
     def __repr__(self):
         """String representation."""
@@ -31,10 +35,18 @@ class PredictionServer(object):
         class Predictions(Resource):
             def post(self):
                 data = request.get_json()
+                logger.debug('Received JSON data of length {:,}'.format(len(data)))
                 data = np.array(data)
-                logger.debug(data)
-                prediction = predict(data)
-                logger.debug(prediction)
+                logger.debug('Converted JSON data to Numpy array with shape {}'.format(data.shape))
+                try:
+                    prediction = predict(data)
+                except Exception as e:
+                    # log exception and return the message in a 500 response
+                    logger.error('{} exception: {}'.format(type(e).__name__, e))
+                    response = jsonify(dict(message=str(e)))
+                    response.status_code = 500
+                    return response
+                logger.debug('Predictions generated with shape {}'.format(prediction.shape))
                 return prediction.tolist()
 
         # map resource to endpoint
