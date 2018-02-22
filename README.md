@@ -10,12 +10,13 @@ ServeIt deploys your trained models to a RESTful API for prediction serving. Cur
 
 1. Model prediction serving
 1. Supplementary information endpoint creation
+1. Input validation and exception handling
 1. Configurable request and response logging (work in progress)
 
 
 ## Installation: Python 2.7 and Python 3.6
 * PyPi: `pip install serveit`
-* source: `git clone https://github.com/rtlee9/serveit.git && cd serveit && pip install -e .`
+* source: `python setup.py`
 
 ## Supported libraries
 * Scikit-Learn
