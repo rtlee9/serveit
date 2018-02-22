@@ -1,6 +1,7 @@
 """Base class for serving predictions."""
 from flask import Flask, request
 from flask_restful import Resource, Api
+import numpy as np
 from meinheld import server, middleware
 
 from .config import WSGI_HOST, WSGI_PORT
@@ -31,6 +32,7 @@ class PredictionServer(object):
         class Predictions(Resource):
             def post(self):
                 data = request.get_json()
+                data = np.array(data)
                 logger.debug(data)
                 prediction = predict(data)
                 logger.debug(prediction)
