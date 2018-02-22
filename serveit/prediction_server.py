@@ -1,9 +1,9 @@
 """Base class for serving predictions."""
 from flask import Flask, request
 from flask_restful import Resource, Api
+from meinheld import server, middleware
 
-from .config import WSGI_OPTIONS
-from .wsgi import StandaloneApplication
+from .config import WSGI_HOST, WSGI_PORT
 from .utils import make_serializable
 
 
@@ -60,4 +60,6 @@ class PredictionServer(object):
 
     def serve(self):
         """Serve predictions as an API endpoint."""
-        self.server = StandaloneApplication(self.app, WSGI_OPTIONS).run()
+        # self.app.run()
+        server.listen((WSGI_HOST, WSGI_PORT))
+        server.run(middleware.WebSocketMiddleware(self.app))
