@@ -4,7 +4,6 @@ from flask_restful import Resource, Api
 import numpy as np
 from meinheld import server, middleware
 
-from .config import WSGI_HOST, WSGI_PORT
 from .utils import make_serializable
 
 
@@ -60,8 +59,8 @@ class PredictionServer(object):
 
         self.api.add_resource(info_factory(name), '/info/{}'.format(name))
 
-    def serve(self):
+    def serve(self, host='127.0.0.1', port=5000):
         """Serve predictions as an API endpoint."""
-        # self.app.run()
-        server.listen((WSGI_HOST, WSGI_PORT))
+        # self.app.run(host=host, port=port)
+        server.listen((host, port))
         server.run(middleware.WebSocketMiddleware(self.app))
