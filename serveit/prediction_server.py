@@ -41,7 +41,11 @@ class PredictionServer(object):
                 try:
                     prediction = predict(data)
                 except Exception as e:
+                    # log exception and return the message in a 500 response
                     logger.error('{} exception: {}'.format(type(e).__name__, e))
+                    response = jsonify(dict(message=str(e)))
+                    response.status_code = 500
+                    return response
                 logger.debug('Predictions generated with shape {}'.format(prediction.shape))
                 return prediction.tolist()
 
