@@ -5,6 +5,9 @@ import numpy as np
 from meinheld import server, middleware
 
 from .utils import make_serializable
+from .log_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class PredictionServer(object):
@@ -16,6 +19,7 @@ class PredictionServer(object):
         self.app = Flask('{}_{}'.format(self.__class__.__name__, type(predict).__name__))
         self.api = Api(self.app)
         self._create_prediction_endpoint()
+        self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
 
     def __repr__(self):
         """String representation."""
