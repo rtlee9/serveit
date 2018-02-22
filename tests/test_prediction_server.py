@@ -1,8 +1,6 @@
-"""Test PredictionServer."""
-import unittest
+"""Base PredictionServer test class."""
 import json
 import numpy as np
-from sklearn.datasets import load_iris, load_boston
 
 from serveit.sklearn_server import PredictionServer
 
@@ -83,87 +81,3 @@ class PredictionServerTest(object):
             # TODO: remove variance from this test (i.e., no chance of false negative)
             pred_pct_diff = np.array(response_data).mean() / self.data.target.mean() - 1
             self.assertAlmostEqual(pred_pct_diff / 1e4, 0, places=1)
-
-
-class IrisLogisticRegressionTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with LogisticRegression fitted on iris data."""
-
-    def setUp(self):
-        """Unittest set up."""
-        from sklearn.linear_model import LogisticRegression
-        self.model = LogisticRegression()
-        super(IrisLogisticRegressionTest, self)._setup(self.model.fit, load_iris())
-
-
-class IrisSvcTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with SVC fitted on iris data."""
-
-    def setUp(self):
-        """Unittest set up."""
-        from sklearn.svm import SVC
-        self.model = SVC()
-        super(IrisSvcTest, self)._setup(self.model.fit, load_iris())
-
-
-class IrisRfcTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with RandomForestClassifier fitted on iris data."""
-
-    def setUp(self):
-        """Unittest set up."""
-        from sklearn.ensemble import RandomForestClassifier
-        self.model = RandomForestClassifier()
-        super(IrisRfcTest, self)._setup(self.model.fit, load_iris())
-
-
-class BostonLinearRegressionTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with LogisticRegression fitted on housing data."""
-
-    def setUp(self):
-        """Unittest set up."""
-        from sklearn.linear_model import LinearRegression
-        self.model = LinearRegression()
-        super(BostonLinearRegressionTest, self)._setup(self.model.fit, load_boston())
-
-
-class BostonSvrTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with SVR fitted on housing data."""
-
-    def setUp(self):
-        """Unittest set up."""
-        from sklearn.svm import SVR
-        self.model = SVR()
-        super(BostonSvrTest, self)._setup(self.model.fit, load_boston())
-
-
-class BostonRfrTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with LogisticRegression fitted on housing data."""
-
-    def setUp(self):
-        """Unittest set up."""
-        from sklearn.ensemble import RandomForestRegressor
-        self.model = RandomForestRegressor()
-        super(BostonRfrTest, self)._setup(self.model.fit, load_boston())
-
-
-class BostonKerasNNTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with Keras nerual net fitted on housing data."""
-
-    def setUp(self):
-        """Unittest set up."""
-        data = load_boston()
-        self.model = self.get_model(data.data.shape[1])
-        super(BostonKerasNNTest, self)._setup(lambda X, y: None, data)
-
-    def get_model(self, input_dim):
-        """Create and compile simple model."""
-        from keras.models import Sequential
-        from keras.layers import Dense
-        model = Sequential()
-        model.add(Dense(100, input_dim=input_dim, activation='sigmoid'))
-        model.add(Dense(1))
-        model.compile(loss='mean_squared_error', optimizer='SGD')
-        return model
-
-
-if __name__ == '__main__':
-    unittest.main()

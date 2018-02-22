@@ -4,7 +4,7 @@ import json
 from sklearn.datasets import load_iris, load_boston
 
 from serveit.sklearn_server import SklearnServer
-from test_prediction_server import PredictionServerTest
+from tests.test_prediction_server import PredictionServerTest
 
 
 class SklearnServerTest(PredictionServerTest, object):
