@@ -1,5 +1,5 @@
 """Base class for serving predictions."""
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 import numpy as np
 from meinheld import server, middleware
@@ -35,10 +35,14 @@ class PredictionServer(object):
         class Predictions(Resource):
             def post(self):
                 data = request.get_json()
+                logger.debug('Received JSON data of length {:,}'.format(len(data)))
                 data = np.array(data)
-                logger.debug(data)
-                prediction = predict(data)
-                logger.debug(prediction)
+                logger.debug('Converted JSON data to Numpy array with shape {}'.format(data.shape))
+                try:
+                    prediction = predict(data)
+                except Exception as e:
+                    logger.error('{} exception: {}'.format(type(e).__name__, e))
+                logger.debug('Predictions generated with shape {}'.format(prediction.shape))
                 return prediction.tolist()
 
         # map resource to endpoint
