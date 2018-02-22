@@ -1,7 +1,7 @@
 """Test SklearnServer."""
 import unittest
 import json
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_iris, load_boston
 
 from serveit.sklearn_server import SklearnServer
 from test_prediction_server import PredictionServerTest
@@ -66,6 +66,36 @@ class IrisRandomForestTest(unittest.TestCase, SklearnServerTest):
         from sklearn.ensemble import RandomForestClassifier
         self.model = RandomForestClassifier()
         super(IrisRandomForestTest, self)._setup(load_iris())
+
+
+class BostonLinearRegressionTest(unittest.TestCase, PredictionServerTest):
+    """Test PredictionServer with LogisticRegression fitted on housing data."""
+
+    def setUp(self):
+        """Unittest set up."""
+        from sklearn.linear_model import LinearRegression
+        self.model = LinearRegression()
+        super(BostonLinearRegressionTest, self)._setup(self.model.fit, load_boston())
+
+
+class BostonSvrTest(unittest.TestCase, PredictionServerTest):
+    """Test PredictionServer with SVR fitted on housing data."""
+
+    def setUp(self):
+        """Unittest set up."""
+        from sklearn.svm import SVR
+        self.model = SVR()
+        super(BostonSvrTest, self)._setup(self.model.fit, load_boston())
+
+
+class BostonRfrTest(unittest.TestCase, PredictionServerTest):
+    """Test PredictionServer with LogisticRegression fitted on housing data."""
+
+    def setUp(self):
+        """Unittest set up."""
+        from sklearn.ensemble import RandomForestRegressor
+        self.model = RandomForestRegressor()
+        super(BostonRfrTest, self)._setup(self.model.fit, load_boston())
 
 if __name__ == '__main__':
     unittest.main()
