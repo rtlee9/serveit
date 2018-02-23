@@ -46,7 +46,8 @@ class PredictionServer(object):
 
         # create restful resource
         class Predictions(Resource):
-            def post(self):
+            @staticmethod
+            def post():
                 # parse request data
                 data = request.get_json()
                 logger.debug('Received JSON data of length {:,}'.format(len(data)))
@@ -87,7 +88,8 @@ class PredictionServer(object):
 
         # create generic restful resource to serve static JSON data
         class InfoBase(Resource):
-            def get(self):
+            @staticmethod
+            def get():
                 return data
 
         def info_factory(name):
