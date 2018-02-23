@@ -3,7 +3,6 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/2af32a3840d5441e815f3956659b091f)](https://www.codacy.com/app/ryantlee9/serveit)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/2af32a3840d5441e815f3956659b091f)](https://www.codacy.com/app/ryantlee9/serveit)
 [![PyPI version](https://badge.fury.io/py/ServeIt.svg)](https://badge.fury.io/py/ServeIt)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 
 ServeIt lets you deploy your models to a RESTful API for prediction serving in one line of code. Current features include:
