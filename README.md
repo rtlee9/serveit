@@ -30,8 +30,8 @@ from sklearn.linear_model import LogisticRegression
 
 # fit a model on the Iris dataset
 data = load_iris()
-reg = LogisticRegression()
-reg.fit(data.data, data.target)
+clf = LogisticRegression()
+clf.fit(data.data, data.target)
 ```
 
 Serve your trained model:
@@ -39,7 +39,7 @@ Serve your trained model:
 from serveit.sklearn_server import SklearnServer
 
 # initialize server
-sklearn_server = SklearnServer(reg, reg.predict)
+sklearn_server = SklearnServer(clf, clf.predict)
 
 # add (optional) informational endpoints
 sklearn_server.create_model_info_endpoint()
