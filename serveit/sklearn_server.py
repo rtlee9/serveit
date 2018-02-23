@@ -32,7 +32,8 @@ class SklearnServer(PredictionServer):
 
         # create generic restful resource to serve model information as JSON
         class ModelInfo(Resource):
-            def get(self):
+            @staticmethod
+            def get():
                 return model_details
 
         self.api.add_resource(ModelInfo, path)
