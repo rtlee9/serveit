@@ -5,11 +5,11 @@
 [![PyPI version](https://badge.fury.io/py/ServeIt.svg)](https://badge.fury.io/py/ServeIt)
 
 
-ServeIt lets you deploy your models to a RESTful API for prediction serving in one line of code. Current features include:
+ServeIt lets you deploy your models to a production-quality RESTful API for prediction serving in one line of code. Current features include:
 
 1. Model prediction serving
 1. Supplementary information endpoint creation
-1. Input validation and exception handling
+1. User-provided input validation and exception handling
 1. Configurable request and response logging (work in progress)
 
 
@@ -17,7 +17,7 @@ ServeIt lets you deploy your models to a RESTful API for prediction serving in o
 Installation is easy with pip: `pip install serveit`
 
 ## Usage:
-Deploy your model to a production-quality API with one line of code:
+Deploy your model to an API endpoint with one line of code:
 ```python
 from serveit.sklearn_server import SklearnServer
 
