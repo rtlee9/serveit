@@ -3,8 +3,6 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/2af32a3840d5441e815f3956659b091f)](https://www.codacy.com/app/ryantlee9/serveit)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/2af32a3840d5441e815f3956659b091f)](https://www.codacy.com/app/ryantlee9/serveit)
 [![PyPI version](https://badge.fury.io/py/ServeIt.svg)](https://badge.fury.io/py/ServeIt)
-[![Python 2.7](https://img.shields.io/badge/python-2.7-blue.svg)](#installation-python-27-and-python-36)
-[![Python 3.7](https://img.shields.io/badge/python-3.6-blue.svg)](#installation-python-27-and-python-36)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 
