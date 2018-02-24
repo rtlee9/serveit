@@ -26,7 +26,7 @@ class PredictionServer(object):
         self.app = Flask('{}_{}'.format(self.__class__.__name__, type(predict).__name__))
         self.api = Api(self.app, catch_all_404s=True)
         self._create_prediction_endpoint(input_validation)
-        logger.info('Model predictions now being served from endpoint /predictions (available via POST)')
+        logger.info('Model predictions registered to endpoint /predictions (available via POST)')
         self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
 
     def __repr__(self):
@@ -101,7 +101,7 @@ class PredictionServer(object):
 
         path = '/info/{}'.format(name)
         self.api.add_resource(info_factory(name), path)
-        logger.info('Added informational resource at path {} (available via GET)'.format(path))
+        logger.info('Regestered informational resource to {} (available via GET)'.format(path))
         logger.debug('Endpoint {} will now serve the following static data:\n{}'.format(path, data))
 
     def serve(self, host='127.0.0.1', port=5000):

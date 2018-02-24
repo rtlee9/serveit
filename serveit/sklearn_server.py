@@ -37,7 +37,7 @@ class SklearnServer(PredictionServer):
                 return model_details
 
         self.api.add_resource(ModelInfo, path)
-        self.app.logger.info('Added informational resource at path {} (available via GET)'.format(path))
+        self.app.logger.info('Regestered informational resource to {} (available via GET)'.format(path))
         self.app.logger.debug('Endpoint {} will now serve the following static data:\n{}'.format(path, model_details))
 
 
