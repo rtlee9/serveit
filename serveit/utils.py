@@ -17,7 +17,10 @@ def make_serializable(data):
     if isinstance(data, dict):
         return {key: make_serializable(value) for key, value in data.items()}
     if hasattr(data, '__iter__'):
-        return [make_serializable(element) for element in data]
+        try:
+            return [make_serializable(element) for element in data]
+        except Exception:
+            pass
 
     # last resort: convert to string
     return str(data)
