@@ -1,5 +1,8 @@
 """Utility methods."""
 import json
+from .log_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def make_serializable(data):
@@ -20,7 +23,7 @@ def make_serializable(data):
         try:
             return [make_serializable(element) for element in data]
         except Exception:
-            pass
+            logger.debug('Could not serialize {}; converting to string'.format(data))
 
     # last resort: convert to string
     return str(data)
