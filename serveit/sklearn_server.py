@@ -16,12 +16,13 @@ class SklearnServer(PredictionServer):
         """Initialize class with model and prediction function."""
         super(SklearnServer, self).__init__(*args, **kwargs)
         self.model = model
+        self._create_model_info_endpoint()
 
     def __repr__(self):
         """String representation."""
         return '<EasyDeploySklearn: {}>'.format(self.model)
 
-    def create_model_info_endpoint(self, path='/info/model'):
+    def _create_model_info_endpoint(self, path='/info/model'):
         """Create an endpoint to serve info GET requests."""
         model = self.model
 
@@ -54,7 +55,6 @@ if __name__ == '__main__':
     eds = SklearnServer(reg, reg.predict)
 
     # add informational endpoints
-    eds.create_model_info_endpoint()
     eds.create_info_endpoint('features', data.feature_names)
     eds.create_info_endpoint('target_labels', data.target_names.tolist())
 

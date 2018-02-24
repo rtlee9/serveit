@@ -32,7 +32,6 @@ def validator(input_data):
 sklearn_server = SklearnServer(clf, clf.predict, validator)
 
 # add informational endpoints
-sklearn_server.create_model_info_endpoint()
 sklearn_server.create_info_endpoint('features', data.feature_names)
 sklearn_server.create_info_endpoint('target_labels', data.target_names.tolist())
 

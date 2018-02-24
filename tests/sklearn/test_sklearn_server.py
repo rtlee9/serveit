@@ -21,16 +21,9 @@ class SklearnServerTest(PredictionServerTest, object):
         self.sklearn_server = SklearnServer(self.model, self.model.predict)
         self.app = self.sklearn_server.app.test_client()
 
-    def test_model_info_none(self):
-        """Verify 404 response if /info/model endpoint not yet created."""
-        response = self.app.get('/info/model')
-        self.assertEqual(response.status_code, 404)
-
     def test_model_info(self):
         """Test model info endpoint."""
-        self.sklearn_server.create_model_info_endpoint()
-        app = self.sklearn_server.app.test_client()
-        response = app.get('/info/model')
+        response = self.app.get('/info/model')
         response_data = json.loads(response.get_data())
         self.assertGreater(len(response_data), 3)
         expected_keys = ['classes_']

@@ -18,7 +18,6 @@ from serveit.sklearn_server import SklearnServer
 sklearn_server = SklearnServer(clf, clf.predict)
 
 # optional: add informational endpoints
-sklearn_server.create_model_info_endpoint()
 sklearn_server.create_info_endpoint('features', data.feature_names)
 sklearn_server.create_info_endpoint('target_labels', data.target_names.tolist())
 
