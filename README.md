@@ -4,8 +4,7 @@
 [![Codacy Coverage Badge](https://api.codacy.com/project/badge/Coverage/2af32a3840d5441e815f3956659b091f)](https://www.codacy.com/app/ryantlee9/serveit)
 [![PyPI version](https://badge.fury.io/py/ServeIt.svg)](https://badge.fury.io/py/ServeIt)
 
-
-ServeIt lets you deploy your models to a production-quality RESTful API for prediction serving in one line of code. Current features include:
+ServeIt lets you serve model predictions and supplementary information from a RESTful API in one line of code. Current features include:
 
 1. Model prediction serving
 1. Supplementary information endpoint creation
@@ -21,8 +20,8 @@ Deploy your model to an API endpoint with one line of code:
 ```python
 from serveit.server import ModelServer
 
-# provide the server with a model and tell it which
-# method to use for predictions
+# initialize the server with a model and a method to use
+# for predictions
 ModelServer(clf, clf.predict).serve()
 ```
 
@@ -34,7 +33,7 @@ curl -XPOST 'localhost:5000/predictions'\
 # [1, 0, 1, 0, 2]
 ```
 
-Please see the [examples](examples) directory for additional usage samples.
+Please see the [examples](examples) directory for additional usage.
 
 ## Supported libraries
 * Scikit-Learn
