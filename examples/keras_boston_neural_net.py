@@ -1,6 +1,6 @@
 """Sample ServeIt prediction server."""
 from sklearn.datasets import load_boston
-from serveit.prediction_server import PredictionServer
+from serveit.server import ModelServer
 from keras.models import Sequential
 from keras.layers import Dense
 
@@ -38,11 +38,11 @@ def validator(input_data):
     # validation passed
     return True, None
 
-# deploy model to a PredictionServer
-prediction_server = PredictionServer(model.predict, validator)
+# deploy model to a ModelServer
+server = ModelServer(model, model.predict, validator)
 
 # add informational endpoints
-prediction_server.create_info_endpoint('features', data.feature_names)
+server.create_info_endpoint('features', data.feature_names)
 
 # start API
-prediction_server.serve()
+server.serve()

@@ -12,18 +12,17 @@ clf.fit(data.data, data.target)
 ```
 Serve your trained model:
 ```python
-from serveit.sklearn_server import SklearnServer
+from serveit.server import ModelServer
 
 # initialize server
-sklearn_server = SklearnServer(clf, clf.predict)
+server = ModelServer(clf, clf.predict)
 
 # optional: add informational endpoints
-sklearn_server.create_model_info_endpoint()
-sklearn_server.create_info_endpoint('features', data.feature_names)
-sklearn_server.create_info_endpoint('target_labels', data.target_names.tolist())
+server.create_info_endpoint('features', data.feature_names)
+server.create_info_endpoint('target_labels', data.target_names.tolist())
 
 # start serving predictions from API
-sklearn_server.serve()
+server.serve()
 ```
 
 Then check out your new API:

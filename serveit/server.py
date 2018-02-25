@@ -10,10 +10,10 @@ from .log_utils import get_logger
 logger = get_logger(__name__)
 
 
-class PredictionServer(object):
+class ModelServer(object):
     """Easy deploy class."""
 
-    def __init__(self, predict, input_validation=lambda data: (True, None)):
+    def __init__(self, model, predict, input_validation=lambda data: (True, None)):
         """Initialize class with prediction function.
 
         Arguments:
@@ -22,12 +22,14 @@ class PredictionServer(object):
             - input_validation (fn): takes a numpy array as input;
                 returns True if validation passes and False otherwise
         """
+        self.model = model
         self.predict = predict
         self.app = Flask('{}_{}'.format(self.__class__.__name__, type(predict).__name__))
         self.api = Api(self.app, catch_all_404s=True)
         self._create_prediction_endpoint(input_validation)
         logger.info('Model predictions registered to endpoint /predictions (available via POST)')
         self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
+        self._create_model_info_endpoint()
 
     def __repr__(self):
         """String representation."""
@@ -75,6 +77,7 @@ class PredictionServer(object):
                     response = jsonify(dict(message=str(e)))
                     response.status_code = 500
                     return response
+                logger.debug(prediction)
                 logger.debug('Predictions generated with shape {}'.format(prediction.shape))
                 return prediction.tolist()
 
@@ -103,6 +106,25 @@ class PredictionServer(object):
         self.api.add_resource(info_factory(name), path)
         logger.info('Regestered informational resource to {} (available via GET)'.format(path))
         logger.debug('Endpoint {} will now serve the following static data:\n{}'.format(path, data))
+
+    def _create_model_info_endpoint(self, path='/info/model'):
+        """Create an endpoint to serve info GET requests."""
+        model = self.model
+
+        # parse model details
+        model_details = {}
+        for key, value in model.__dict__.items():
+            model_details[key] = make_serializable(value)
+
+        # create generic restful resource to serve model information as JSON
+        class ModelInfo(Resource):
+            @staticmethod
+            def get():
+                return model_details
+
+        self.api.add_resource(ModelInfo, path)
+        self.app.logger.info('Regestered informational resource to {} (available via GET)'.format(path))
+        self.app.logger.debug('Endpoint {} will now serve the following static data:\n{}'.format(path, model_details))
 
     def serve(self, host='127.0.0.1', port=5000):
         """Serve predictions as an API endpoint."""

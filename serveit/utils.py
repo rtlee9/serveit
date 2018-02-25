@@ -1,5 +1,8 @@
 """Utility methods."""
 import json
+from .log_utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def make_serializable(data):
@@ -17,7 +20,10 @@ def make_serializable(data):
     if isinstance(data, dict):
         return {key: make_serializable(value) for key, value in data.items()}
     if hasattr(data, '__iter__'):
-        return [make_serializable(element) for element in data]
+        try:
+            return [make_serializable(element) for element in data]
+        except Exception:
+            logger.debug('Could not serialize {}; converting to string'.format(data))
 
     # last resort: convert to string
     return str(data)
