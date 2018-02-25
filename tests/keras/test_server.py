@@ -1,18 +1,18 @@
-"""Test PredictionServer with Keras models."""
+"""Test ModelServer with Keras models."""
 import unittest
 from sklearn.datasets import load_boston
 
-from tests.test_prediction_server import PredictionServerTest
+from tests.test_server import ModelServerTest
 
 
-class BostonKerasNNTest(unittest.TestCase, PredictionServerTest):
-    """Test PredictionServer with Keras nerual net fitted on housing data."""
+class BostonKerasNNTest(unittest.TestCase, ModelServerTest):
+    """Test ModelServer with Keras nerual net fitted on housing data."""
 
     def setUp(self):
         """Unittest set up."""
         data = load_boston()
         self.model = self.get_model(data.data.shape[1])
-        super(BostonKerasNNTest, self)._setup(self.model.fit, data)
+        super(BostonKerasNNTest, self)._setup(self.model, self.model.fit, data)
 
     def get_model(self, input_dim):
         """Create and compile simple model."""

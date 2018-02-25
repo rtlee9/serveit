@@ -19,11 +19,11 @@ Installation is easy with pip: `pip install serveit`
 ## Usage:
 Deploy your model to an API endpoint with one line of code:
 ```python
-from serveit.sklearn_server import SklearnServer
+from serveit.server import ModelServer
 
 # provide the server with a model and tell it which
 # method to use for predictions
-SklearnServer(clf, clf.predict).serve()
+ModelServer(clf, clf.predict).serve()
 ```
 
 Then check out your new API:
@@ -38,8 +38,8 @@ Please see the [examples](examples) directory for additional usage samples.
 
 ## Supported libraries
 * Scikit-Learn
+* Keras
 
 ## Coming soon:
 * TensorFlow
-* Keras
 * PyTorch

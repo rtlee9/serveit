@@ -1,7 +1,7 @@
 """Sample ServeIt Scikit-Learn server."""
 from sklearn.datasets import load_boston
 from sklearn.linear_model import LinearRegression
-from serveit.sklearn_server import SklearnServer
+from serveit.server import ModelServer
 
 # fit a model on the Boston housing dataset
 data = load_boston()
@@ -29,10 +29,10 @@ def validator(input_data):
     return True, None
 
 # deploy model to a SkLearnServer
-sklearn_server = SklearnServer(reg, reg.predict, validator)
+server = ModelServer(reg, reg.predict, validator)
 
 # add informational endpoints
-sklearn_server.create_info_endpoint('features', data.feature_names)
+server.create_info_endpoint('features', data.feature_names)
 
 # start API
-sklearn_server.serve()
+server.serve()

@@ -1,7 +1,7 @@
 """Sample ServeIt Scikit-Learn server."""
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
-from serveit.sklearn_server import SklearnServer
+from serveit.server import ModelServer
 
 # fit a model on the Iris dataset
 data = load_iris()
@@ -29,11 +29,11 @@ def validator(input_data):
     return True, None
 
 # deploy model to a SkLearnServer
-sklearn_server = SklearnServer(clf, clf.predict, validator)
+server = ModelServer(clf, clf.predict, validator)
 
 # add informational endpoints
-sklearn_server.create_info_endpoint('features', data.feature_names)
-sklearn_server.create_info_endpoint('target_labels', data.target_names.tolist())
+server.create_info_endpoint('features', data.feature_names)
+server.create_info_endpoint('target_labels', data.target_names.tolist())
 
 # start API
-sklearn_server.serve()
+server.serve()

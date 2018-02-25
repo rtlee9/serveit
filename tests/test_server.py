@@ -1,19 +1,19 @@
-"""Base PredictionServer test class."""
+"""Base ModelServer test class."""
 import json
 import numpy as np
 
-from serveit.sklearn_server import PredictionServer
+from serveit.server import ModelServer
 
 
-class PredictionServerTest(object):
+class ModelServerTest(object):
     """Base class to test the prediction server.
 
-    PredictionServerTest should be inherited by a class that has a `model` attribute,
-    and calls `PredictionServerTest._setup()` after instantiation. That class should
+    ModelServerTest should be inherited by a class that has a `model` attribute,
+    and calls `ModelServerTest._setup()` after instantiation. That class should
     also inherit from `unittest.TestCase` to ensure tests are executed.
     """
 
-    def _setup(self, fit, data):
+    def _setup(self, model, fit, data):
         """Set up method to be called before each unit test.
 
         Arguments:
@@ -21,8 +21,8 @@ class PredictionServerTest(object):
         """
         self.data = data
         fit(self.data.data, self.data.target)
-        self.sklearn_server = PredictionServer(self.model.predict)
-        self.app = self.sklearn_server.app.test_client()
+        self.server = ModelServer(self.model, self.model.predict)
+        self.app = self.server.app.test_client()
 
     def test_404_media(self):
         """Make sure API serves 404 response with JSON."""
@@ -40,8 +40,8 @@ class PredictionServerTest(object):
 
     def test_features_info(self):
         """Test features info endpoint."""
-        self.sklearn_server.create_info_endpoint('features', self.data.feature_names)
-        app = self.sklearn_server.app.test_client()
+        self.server.create_info_endpoint('features', self.data.feature_names)
+        app = self.server.app.test_client()
         response = app.get('/info/features')
         response_data = json.loads(response.get_data())
         self.assertEqual(len(response_data), self.data.data.shape[1])
@@ -59,8 +59,8 @@ class PredictionServerTest(object):
         """Test target labels info endpoint."""
         if not hasattr(self.data, 'target_names'):
             return
-        self.sklearn_server.create_info_endpoint('target_labels', self.data.target_names.tolist())
-        app = self.sklearn_server.app.test_client()
+        self.server.create_info_endpoint('target_labels', self.data.target_names.tolist())
+        app = self.server.app.test_client()
         response = app.get('/info/target_labels')
         response_data = json.loads(response.get_data())
         self.assertEqual(len(response_data), self.data.target_names.shape[0])
@@ -107,8 +107,8 @@ class PredictionServerTest(object):
             return True, None
 
         # set up test server
-        sklearn_server = PredictionServer(self.model.predict, feature_count_check)
-        app = sklearn_server.app.test_client()
+        server = ModelServer(self.model, self.model.predict, feature_count_check)
+        app = server.app.test_client()
 
         # generate sample data
         sample_idx = np.random.randint(self.data.data.shape[0], size=100)
@@ -133,3 +133,9 @@ class PredictionServerTest(object):
         expected_reason = '{} features required, {} features provided'.format(
             self.data.data.shape[1] - 1, self.data.data.shape[1])
         self.assertIn(expected_reason, response_data['message'])
+
+    def test_model_info(self):
+        """Test model info endpoint."""
+        response = self.app.get('/info/model')
+        response_data = json.loads(response.get_data())
+        self.assertGreater(len(response_data), 3)  # TODO: expand test scope
