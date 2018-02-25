@@ -11,7 +11,6 @@ ServeIt lets you serve model predictions and supplementary information from a RE
 1. User-provided input validation and exception handling
 1. Configurable request and response logging (work in progress)
 
-
 ## Installation: Python 2.7 and Python 3.6
 Installation is easy with pip: `pip install serveit`
 
@@ -35,10 +34,16 @@ curl -XPOST 'localhost:5000/predictions'\
 
 Please see the [examples](examples) directory for additional usage.
 
-## Supported libraries
+### Supported libraries
 * Scikit-Learn
 * Keras
 
-## Coming soon:
+### Coming soon:
 * TensorFlow
 * PyTorch
+
+## Building
+You can build locally with: `python setup.py`
+
+## License
+[MIT](LICENSE.md)
