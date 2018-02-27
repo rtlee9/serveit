@@ -1,5 +1,8 @@
 """Utility methods."""
 import json
+from flask import request
+import numpy as np
+
 from .log_utils import get_logger
 
 logger = get_logger(__name__)
@@ -36,3 +39,16 @@ def is_serializable(data):
         return True
     except TypeError:
         return False
+
+
+def json_numpy_loader():
+    """Load data from JSON request and convert to numpy array."""
+    # parse request data
+    data = request.get_json()
+    logger.debug('Received JSON data of length {:,}'.format(len(data)))
+
+    # convert to numpy array
+    data = np.array(data)
+    logger.debug('Converted JSON data to Numpy array with shape {}'.format(data.shape))
+
+    return data

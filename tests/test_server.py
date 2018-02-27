@@ -139,3 +139,39 @@ class ModelServerTest(object):
         response = self.app.get('/info/model')
         response_data = json.loads(response.get_data())
         self.assertGreater(len(response_data), 3)  # TODO: expand test scope
+
+    def test_data_loader(self):
+        """Test model prediction with a custom data loader callback."""
+        # define custom data loader
+        def read_json_from_dict():
+            from flask import request
+            # read data as the value of the 'data' key
+            data = request.get_json()
+            return np.array(data['data'])
+
+        # create test client
+        server = ModelServer(self.model, self.model.predict, data_loader=read_json_from_dict)
+        app = server.app.test_client()
+
+        # generate sample data, and wrap in dict keyed by 'data'
+        sample_idx = np.random.randint(self.data.data.shape[0], size=100)
+        sample_data = self.data.data[sample_idx, :]
+        data_dict = dict(data=sample_data.tolist())
+
+        response = app.post(
+            '/predictions',
+            headers={'Content-Type': 'application/json'},
+            data=json.dumps(data_dict),
+        )
+        response_data = json.loads(response.get_data())
+        self.assertEqual(len(response_data), len(sample_data))
+        if self.data.target.ndim > 1:
+            # for multiclass each prediction should be one of the training labels
+            for prediction in response_data:
+                self.assertIn(prediction, self.data.target)
+        else:
+            # the average regression prediction for a sample of data should be similar
+            # to the population mean
+            # TODO: remove variance from this test (i.e., no chance of false negative)
+            pred_pct_diff = np.array(response_data).mean() / self.data.target.mean() - 1
+            self.assertAlmostEqual(pred_pct_diff / 1e4, 0, places=1)

@@ -1,9 +1,8 @@
 """Base class for serving predictions."""
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 from flask_restful import Resource, Api
-import numpy as np
 
-from .utils import make_serializable
+from .utils import make_serializable, json_numpy_loader
 from .log_utils import get_logger
 
 logger = get_logger(__name__)
@@ -12,7 +11,7 @@ logger = get_logger(__name__)
 class ModelServer(object):
     """Easy deploy class."""
 
-    def __init__(self, model, predict, input_validation=lambda data: (True, None)):
+    def __init__(self, model, predict, input_validation=lambda data: (True, None), data_loader=json_numpy_loader):
         """Initialize class with prediction function.
 
         Arguments:
@@ -20,12 +19,15 @@ class ModelServer(object):
                 and returns a prediction of targets
             - input_validation (fn): takes a numpy array as input;
                 returns True if validation passes and False otherwise
+            - data_loader (fn): reads flask request and returns data preprocessed to be
+                used in the `predict` method
         """
         self.model = model
         self.predict = predict
+        self.data_loader = data_loader
         self.app = Flask('{}_{}'.format(self.__class__.__name__, type(predict).__name__))
         self.api = Api(self.app, catch_all_404s=True)
-        self._create_prediction_endpoint(input_validation)
+        self._create_prediction_endpoint(input_validation, data_loader)
         logger.info('Model predictions registered to endpoint /predictions (available via POST)')
         self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
         self._create_model_info_endpoint()
@@ -34,12 +36,14 @@ class ModelServer(object):
         """String representation."""
         return '<PredictionsServer: {}>'.format(type(self.predict).__name__)
 
-    def _create_prediction_endpoint(self, input_validation=lambda data: (True, None)):
+    def _create_prediction_endpoint(self, input_validation=lambda data: (True, None), data_loader=json_numpy_loader):
         """Create an endpoint to serve predictions.
 
         Arguments:
             - input_validation (fn): takes a numpy array as input;
                 returns True if validation passes and False otherwise
+            - data_loader (fn): reads flask request and returns data preprocessed to be
+                used in the `predict` method
         """
         # copy instance variables to local scope for resource class
         predict = self.predict
@@ -49,14 +53,7 @@ class ModelServer(object):
         class Predictions(Resource):
             @staticmethod
             def post():
-                # parse request data
-                data = request.get_json()
-                logger.debug('Received JSON data of length {:,}'.format(len(data)))
-
-                # convert to numpy array
-                data = np.array(data)
-                logger.debug('Converted JSON data to Numpy array with shape {}'.format(data.shape))
-
+                data = data_loader()
                 # sanity check using user defined callback (default is no check)
                 validation_pass, validation_reason = input_validation(data)
                 if not validation_pass:
