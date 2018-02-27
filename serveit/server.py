@@ -11,7 +11,13 @@ logger = get_logger(__name__)
 class ModelServer(object):
     """Easy deploy class."""
 
-    def __init__(self, model, predict, input_validation=lambda data: (True, None), data_loader=json_numpy_loader):
+    def __init__(
+            self,
+            model,
+            predict,
+            input_validation=lambda data: (True, None),
+            data_loader=json_numpy_loader,
+            postprocessor=lambda x: x.tolist()):
         """Initialize class with prediction function.
 
         Arguments:
@@ -21,13 +27,15 @@ class ModelServer(object):
                 returns True if validation passes and False otherwise
             - data_loader (fn): reads flask request and returns data preprocessed to be
                 used in the `predict` method
+            - postprocessor (fn): transforms the predictions from the `predict` method
         """
         self.model = model
         self.predict = predict
         self.data_loader = data_loader
+        self.postprocessor = postprocessor
         self.app = Flask('{}_{}'.format(self.__class__.__name__, type(predict).__name__))
         self.api = Api(self.app, catch_all_404s=True)
-        self._create_prediction_endpoint(input_validation, data_loader)
+        self._create_prediction_endpoint(input_validation, data_loader=data_loader, postprocessor=postprocessor)
         logger.info('Model predictions registered to endpoint /predictions (available via POST)')
         self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
         self._create_model_info_endpoint()
@@ -36,7 +44,11 @@ class ModelServer(object):
         """String representation."""
         return '<PredictionsServer: {}>'.format(type(self.predict).__name__)
 
-    def _create_prediction_endpoint(self, input_validation=lambda data: (True, None), data_loader=json_numpy_loader):
+    def _create_prediction_endpoint(
+            self,
+            input_validation=lambda data: (True, None),
+            data_loader=json_numpy_loader,
+            postprocessor=lambda x: x.tolist()):
         """Create an endpoint to serve predictions.
 
         Arguments:
@@ -44,6 +56,7 @@ class ModelServer(object):
                 returns True if validation passes and False otherwise
             - data_loader (fn): reads flask request and returns data preprocessed to be
                 used in the `predict` method
+            - postprocessor (fn): transforms the predictions from the `predict` method
         """
         # copy instance variables to local scope for resource class
         predict = self.predict
@@ -75,7 +88,7 @@ class ModelServer(object):
                     return response
                 logger.debug(prediction)
                 logger.debug('Predictions generated with shape {}'.format(prediction.shape))
-                return prediction.tolist()
+                return postprocessor(prediction)
 
         # map resource to endpoint
         self.api.add_resource(Predictions, '/predictions')

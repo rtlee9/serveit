@@ -175,3 +175,32 @@ class ModelServerTest(object):
             # TODO: remove variance from this test (i.e., no chance of false negative)
             pred_pct_diff = np.array(response_data).mean() / self.data.target.mean() - 1
             self.assertAlmostEqual(pred_pct_diff / 1e4, 0, places=1)
+
+    def test_postprocessing(self):
+        """Test predictions endpoint."""
+        # define custom postpreocessor
+        # create test client with postprocessor that wraps predictions in a dictionary
+        server = ModelServer(self.model, self.model.predict, postprocessor=lambda x: dict(prediction=x.tolist()))
+        app = server.app.test_client()
+
+        # generate sample data, and wrap in dict keyed by 'data'
+        sample_idx = np.random.randint(self.data.data.shape[0], size=100)
+        sample_data = self.data.data[sample_idx, :]
+
+        response = app.post(
+            '/predictions',
+            headers={'Content-Type': 'application/json'},
+            data=json.dumps(sample_data.tolist()),
+        )
+        response_data = json.loads(response.get_data())['prediction']  # predictions are nested under 'prediction' key
+        self.assertEqual(len(response_data), len(sample_data))
+        if self.data.target.ndim > 1:
+            # for multiclass each prediction should be one of the training labels
+            for prediction in response_data:
+                self.assertIn(prediction, self.data.target)
+        else:
+            # the average regression prediction for a sample of data should be similar
+            # to the population mean
+            # TODO: remove variance from this test (i.e., no chance of false negative)
+            pred_pct_diff = np.array(response_data).mean() / self.data.target.mean() - 1
+            self.assertAlmostEqual(pred_pct_diff / 1e4, 0, places=1)
