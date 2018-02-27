@@ -2,7 +2,6 @@
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 import numpy as np
-from meinheld import server, middleware
 
 from .utils import make_serializable
 from .log_utils import get_logger
@@ -128,6 +127,7 @@ class ModelServer(object):
 
     def serve(self, host='127.0.0.1', port=5000):
         """Serve predictions as an API endpoint."""
+        from meinheld import server, middleware
         # self.app.run(host=host, port=port)
         server.listen((host, port))
         server.run(middleware.WebSocketMiddleware(self.app))
