@@ -42,3 +42,4 @@ curl -XGET 'localhost:5000/info/target_labels'
 #  ["setosa", "versicolor", "virginica"]
 ```
 
+[View all examples](https://github.com/rtlee9/serveit/tree/master/examples)
