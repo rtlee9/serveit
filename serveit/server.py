@@ -17,7 +17,7 @@ class ModelServer(object):
             predict,
             input_validation=lambda data: (True, None),
             data_loader=json_numpy_loader,
-            postprocessor=lambda x: x.tolist()):
+            postprocessor=make_serializable):
         """Initialize class with prediction function.
 
         Arguments:
@@ -48,7 +48,7 @@ class ModelServer(object):
             self,
             input_validation=lambda data: (True, None),
             data_loader=json_numpy_loader,
-            postprocessor=lambda x: x.tolist()):
+            postprocessor=make_serializable):
         """Create an endpoint to serve predictions.
 
         Arguments:
