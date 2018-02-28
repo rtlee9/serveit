@@ -10,6 +10,7 @@ ServeIt lets you serve model predictions and supplementary information from a RE
 1. Supplementary information endpoint creation
 1. User-provided input validation and exception handling
 1. Configurable request and response logging (work in progress)
+1. Automatic JSON serialization of responses
 
 ## Installation: Python 2.7 and Python 3.6
 Installation is easy with pip: `pip install serveit`
