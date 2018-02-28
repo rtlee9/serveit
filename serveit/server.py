@@ -141,3 +141,7 @@ class ModelServer(object):
         # self.app.run(host=host, port=port)
         server.listen((host, port))
         server.run(middleware.WebSocketMiddleware(self.app))
+
+    def get_app(self):
+        """Return the underlying Flask app."""
+        return self.app

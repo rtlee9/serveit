@@ -204,3 +204,7 @@ class ModelServerTest(object):
             # TODO: remove variance from this test (i.e., no chance of false negative)
             pred_pct_diff = np.array(response_data).mean() / self.data.target.mean() - 1
             self.assertAlmostEqual(pred_pct_diff / 1e4, 0, places=1)
+
+    def test_get_app(self):
+        """Make sure get_app method returns the same app."""
+        self.assertEqual(self.server.get_app(), self.server.app)
