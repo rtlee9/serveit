@@ -1,6 +1,8 @@
 # ServeIt examples
 
-Start by fitting a model:
+## Basic example: Iris predictions with Scikit-learn
+
+Let's train and deploy a logistic regression model to classify irises. We'll start by fitting a model:
 ```python
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
@@ -10,7 +12,7 @@ data = load_iris()
 clf = LogisticRegression()
 clf.fit(data.data, data.target)
 ```
-Serve your trained model:
+Now we can serve our trained model:
 ```python
 from serveit.server import ModelServer
 
@@ -25,7 +27,7 @@ server.create_info_endpoint('target_labels', data.target_names.tolist())
 server.serve()
 ```
 
-Then check out your new API:
+Behold:
 ```bash
 curl -XPOST 'localhost:5000/predictions'\
 	-H "Content-Type: application/json"\
@@ -40,6 +42,78 @@ curl -XGET 'localhost:5000/info/features'
 
 curl -XGET 'localhost:5000/info/target_labels'
 #  ["setosa", "versicolor", "virginica"]
+```
+
+## Advanced example: image classification with Keras
+
+ServeIt accepts optional pre/postprocessing callback methods, making it easy start serving more complex models. Let's deploy a pre-trained Keras model to a new API endpoint so that we can classify images on the fly. We'll start by loading a ResNet50 model pre-trained on ImageNet:
+
+```python
+from keras.applications.resnet50 import ResNet50
+
+# load Resnet50 model pretrained on ImageNet
+model = ResNet50(weights='imagenet')
+```
+
+Next we define methods for loading and preprocessing an image from a URL...
+```python
+from keras.preprocessing import image
+from keras.applications.resnet50 import preprocess_input
+import numpy as np
+from flask import request
+from PIL import Image
+import requests
+from io import BytesIO
+
+# define a loader callback for the API to fetch the relevant data and
+# convert to a format expected by the prediction function
+def loader():
+    """Load image from URL, and preprocess for Resnet."""
+    url = request.args.get('url')  # read image URL as a request URL param
+    response = requests.get(url)  # make request to static image file
+    img = Image.open(BytesIO(response.content))  # open image
+    img = img.resize((224, 224), Image.ANTIALIAS)  # model requires 224x224 pixels
+    x = image.img_to_array(img)  # convert image to numpy array
+    x = np.expand_dims(x, axis=0)  # model expects dim 0 to be iterable across images
+    return preprocess_input(x)  # preprocess the image using keras fn
+```
+
+... and one for postprocessing and serializing the model predictions for the API response:
+```python
+from keras.applications.resnet50 import decode_predictions
+from serveit.utils import make_serializable
+
+# define a postprocessor callback for the API to transform the model predictions
+def postprocessor(predictions):
+    """Decode predictions and serialize."""
+    # decode all class predictions and take top 3
+    top_predictions = decode_predictions(predictions, top=3)[0]
+    # serialize predictions for JSON response
+    return make_serializable(top_predictions)
+```
+
+And now we're ready to start serving our image classifier:
+```python
+# deploy model to a ModelServer
+from serveit.server import ModelServer
+server = ModelServer(
+    model,
+    model.predict,
+    data_loader=loader,
+    postprocessor=postprocessor,
+)
+
+# start API
+server.serve()
+```
+
+Behold:
+```bash
+curl -XPOST 'localhost:5000/predictions?url=https://images.pexels.com/photos/96938/pexels-photo-96938.jpeg'
+# [["n02123045", "tabby", 0.6266211867332458], ["n02124075", "Egyptian_cat", 0.1539127230644226], ["n02123159", "tiger_cat", 0.09456271678209305]]
+
+curl -XPOST 'localhost:5000/predictions?url=https://images.pexels.com/photos/67807/plane-aircraft-take-off-sky-67807.jpeg'
+# [["n02690373", "airliner", 0.4983633756637573], ["n04592741", "wing", 0.2677533030509949], ["n04552348", "warplane", 0.21882124245166779]]
 ```
 
 [View all examples](https://github.com/rtlee9/serveit/tree/master/examples)
