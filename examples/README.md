@@ -116,4 +116,21 @@ curl -XPOST 'localhost:5000/predictions?url=https://images.pexels.com/photos/678
 # [["n02690373", "airliner", 0.4983633756637573], ["n04592741", "wing", 0.2677533030509949], ["n04552348", "warplane", 0.21882124245166779]]
 ```
 
+## Advanced example: serving with gunicorn
+If you have a preference for a specific WSGI HTTP server, you can easily retrieve the underlying app from the server to serve separately. Once you've initialized the ModelServer class, fetch the underlying app in the global scope of a Python script like so:
+
+```python
+# main.py
+app = server.get_app()
+```
+
+Now all you have to do in your shell (or Procfile) is:
+```bash
+# shell
+gunicorn main:app
+
+# Procfile
+web: gunicorn main:app
+```
+
 [View all examples](https://github.com/rtlee9/serveit/tree/master/examples)
