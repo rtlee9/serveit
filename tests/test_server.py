@@ -24,6 +24,20 @@ class ModelServerTest(object):
         self.server = ModelServer(self.model, self.model.predict)
         self.app = self.server.app.test_client()
 
+    @staticmethod
+    def _prediction_post(app, data):
+        """Make a POST request to `app` with JSON body `data`."""
+        return app.post(
+            '/predictions',
+            headers={'Content-Type': 'application/json'},
+            data=json.dumps(data),
+        )
+
+    def _get_sample_data(self, n=100):
+        """Return a sample of size n of self.data."""
+        sample_idx = np.random.randint(self.data.data.shape[0], size=n)
+        return self.data.data[sample_idx, :]
+
     def test_404_media(self):
         """Make sure API serves 404 response with JSON."""
         response = self.app.get('/fake-endpoint')
@@ -71,13 +85,8 @@ class ModelServerTest(object):
 
     def test_predictions(self):
         """Test predictions endpoint."""
-        sample_idx = np.random.randint(self.data.data.shape[0], size=100)
-        sample_data = self.data.data[sample_idx, :]
-        response = self.app.post(
-            '/predictions',
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(sample_data.tolist()),
-        )
+        sample_data = self._get_sample_data()
+        response = self._prediction_post(self.app, sample_data.tolist())
         response_data = json.loads(response.get_data())
         self.assertEqual(len(response_data), len(sample_data))
         if self.data.target.ndim > 1:
@@ -111,23 +120,14 @@ class ModelServerTest(object):
         app = server.app.test_client()
 
         # generate sample data
-        sample_idx = np.random.randint(self.data.data.shape[0], size=100)
-        sample_data = self.data.data[sample_idx, :]
+        sample_data = self._get_sample_data()
 
         # post good data, verify 200 response
-        response = app.post(
-            '/predictions',
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(sample_data.tolist()),
-        )
+        response = self._prediction_post(app, sample_data.tolist())
         self.assertEqual(response.status_code, 200)
 
         # post bad data (drop a single column), verify 400 response
-        response = app.post(
-            '/predictions',
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(sample_data[:, :-1].tolist()),
-        )
+        response = self._prediction_post(app, sample_data[:, :-1].tolist())
         self.assertEqual(response.status_code, 400)
         response_data = json.loads(response.get_data())
         expected_reason = '{} features required, {} features provided'.format(
@@ -155,15 +155,10 @@ class ModelServerTest(object):
         app = server.app.test_client()
 
         # generate sample data, and wrap in dict keyed by 'data'
-        sample_idx = np.random.randint(self.data.data.shape[0], size=100)
-        sample_data = self.data.data[sample_idx, :]
+        sample_data = self._get_sample_data()
         data_dict = dict(data=sample_data.tolist())
 
-        response = app.post(
-            '/predictions',
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(data_dict),
-        )
+        response = self._prediction_post(app, data_dict)
         response_data = json.loads(response.get_data())
         self.assertEqual(len(response_data), len(sample_data))
         if self.data.target.ndim > 1:
@@ -184,15 +179,10 @@ class ModelServerTest(object):
         app = server.app.test_client()
 
         # generate sample data, and wrap in dict keyed by 'data'
-        sample_idx = np.random.randint(self.data.data.shape[0], size=100)
-        sample_data = self.data.data[sample_idx, :]
+        sample_data = self._get_sample_data()
         data_dict = dict(data=sample_data.tolist())
 
-        response = app.post(
-            '/predictions',
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(data_dict),
-        )
+        response = self._prediction_post(app, data_dict)
         response_data = json.loads(response.get_data())
         self.assertEqual(len(response_data), len(sample_data))
         if self.data.target.ndim > 1:
@@ -212,15 +202,10 @@ class ModelServerTest(object):
         server = ModelServer(self.model, self.model.predict, postprocessor=lambda x: dict(prediction=x.tolist()))
         app = server.app.test_client()
 
-        # generate sample data, and wrap in dict keyed by 'data'
-        sample_idx = np.random.randint(self.data.data.shape[0], size=100)
-        sample_data = self.data.data[sample_idx, :]
+        # generate sample data
+        sample_data = self._get_sample_data()
 
-        response = app.post(
-            '/predictions',
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(sample_data.tolist()),
-        )
+        response = self._prediction_post(app, sample_data.tolist())
         response_data = json.loads(response.get_data())['prediction']  # predictions are nested under 'prediction' key
         self.assertEqual(len(response_data), len(sample_data))
         if self.data.target.ndim > 1:
