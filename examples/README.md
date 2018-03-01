@@ -30,8 +30,8 @@ server.serve()
 Behold:
 ```bash
 curl -XPOST 'localhost:5000/predictions'\
-	-H "Content-Type: application/json"\
-	-d "[[5.6, 2.9, 3.6, 1.3], [4.4, 2.9, 1.4, 0.2], [5.5, 2.4, 3.8, 1.1], [5.0, 3.4, 1.5, 0.2], [5.7, 2.5, 5.0, 2.0]]"
+    -H "Content-Type: application/json"\
+    -d "[[5.6, 2.9, 3.6, 1.3], [4.4, 2.9, 1.4, 0.2], [5.5, 2.4, 3.8, 1.1], [5.0, 3.4, 1.5, 0.2], [5.7, 2.5, 5.0, 2.0]]"
 # [1, 0, 1, 0, 2]
 
 curl -XGET 'localhost:5000/info/model'
@@ -58,30 +58,25 @@ model = ResNet50(weights='imagenet')
 Next we define methods for loading and preprocessing an image from a URL...
 ```python
 from keras.preprocessing import image
-from keras.applications.resnet50 import preprocess_input
-import numpy as np
 from flask import request
-from PIL import Image
 import requests
-from io import BytesIO
+from serveit.utils import make_serializable, get_bytes_to_image_callback
 
-# define a loader callback for the API to fetch the relevant data and
-# convert to a format expected by the prediction function
+# define a loader callback for the API to fetch the relevant data and a
+# preprocessor callback to convert to a format expected by the prediction function
 def loader():
     """Load image from URL, and preprocess for Resnet."""
     url = request.args.get('url')  # read image URL as a request URL param
     response = requests.get(url)  # make request to static image file
-    img = Image.open(BytesIO(response.content))  # open image
-    img = img.resize((224, 224), Image.ANTIALIAS)  # model requires 224x224 pixels
-    x = image.img_to_array(img)  # convert image to numpy array
-    x = np.expand_dims(x, axis=0)  # model expects dim 0 to be iterable across images
-    return preprocess_input(x)  # preprocess the image using keras fn
+    return response.content
+
+# get a bytes-to-image callback, resizing the image to 224x224 for ImageNet
+preprocessor = get_bytes_to_image_callback(image_dims=(224, 224))
 ```
 
 ... and one for postprocessing and serializing the model predictions for the API response:
 ```python
 from keras.applications.resnet50 import decode_predictions
-from serveit.utils import make_serializable
 
 # define a postprocessor callback for the API to transform the model predictions
 def postprocessor(predictions):
@@ -100,6 +95,7 @@ server = ModelServer(
     model,
     model.predict,
     data_loader=loader,
+    preprocessor=preprocessor,
     postprocessor=postprocessor,
 )
 

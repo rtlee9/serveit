@@ -5,7 +5,7 @@ import numpy as np
 from serveit.utils import is_serializable, make_serializable
 
 
-class Seralizationtest(unittest.TestCase):
+class SeralizationTest(unittest.TestCase):
     """Test serialization."""
 
     def setUp(self):
@@ -48,6 +48,7 @@ class Seralizationtest(unittest.TestCase):
     def test_make_serializable_object_data(self):
         """make_serializable should return an objects __repr__ if no `tolist` method."""
         self.assertEqual(make_serializable(self.dummy_class), 'XpBheIxCcm')
+
 
 if __name__ == '__main__':
     unittest.main()

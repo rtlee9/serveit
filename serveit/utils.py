@@ -1,7 +1,6 @@
 """Utility methods."""
 import json
 from flask import request
-import numpy as np
 
 from .log_utils import get_logger
 
@@ -43,12 +42,24 @@ def is_serializable(data):
 
 def json_numpy_loader():
     """Load data from JSON request and convert to numpy array."""
-    # parse request data
     data = request.get_json()
     logger.debug('Received JSON data of length {:,}'.format(len(data)))
-
-    # convert to numpy array
-    data = np.array(data)
-    logger.debug('Converted JSON data to Numpy array with shape {}'.format(data.shape))
-
     return data
+
+
+def get_bytes_to_image_callback(image_dims=(224, 224)):
+    """Return a callback to process image bytes for ImageNet."""
+    from keras.preprocessing import image
+    from keras.applications.resnet50 import preprocess_input
+    import numpy as np
+    from PIL import Image
+    from io import BytesIO
+
+    def preprocess_image_bytes(data_bytes):
+        """Process image bytes for ImageNet."""
+        img = Image.open(BytesIO(data_bytes))  # open image
+        img = img.resize(image_dims, Image.ANTIALIAS)  # model requires 224x224 pixels
+        x = image.img_to_array(img)  # convert image to numpy array
+        x = np.expand_dims(x, axis=0)  # model expects dim 0 to be iterable across images
+        return preprocess_input(x)  # preprocess the image using keras fn
+    return preprocess_image_bytes

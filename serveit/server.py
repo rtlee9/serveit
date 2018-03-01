@@ -1,6 +1,7 @@
 """Base class for serving predictions."""
 from flask import Flask, jsonify
 from flask_restful import Resource, Api
+import numpy as np
 
 from .utils import make_serializable, json_numpy_loader
 from .log_utils import get_logger
@@ -17,6 +18,7 @@ class ModelServer(object):
             predict,
             input_validation=lambda data: (True, None),
             data_loader=json_numpy_loader,
+            preprocessor=lambda x: x,
             postprocessor=make_serializable):
         """Initialize class with prediction function.
 
@@ -32,10 +34,16 @@ class ModelServer(object):
         self.model = model
         self.predict = predict
         self.data_loader = data_loader
+        self.preprocessor = preprocessor
         self.postprocessor = postprocessor
         self.app = Flask('{}_{}'.format(self.__class__.__name__, type(predict).__name__))
         self.api = Api(self.app, catch_all_404s=True)
-        self._create_prediction_endpoint(input_validation, data_loader=data_loader, postprocessor=postprocessor)
+        self._create_prediction_endpoint(
+            data_loader=data_loader,
+            input_validation=input_validation,
+            preprocessor=preprocessor,
+            postprocessor=postprocessor,
+        )
         logger.info('Model predictions registered to endpoint /predictions (available via POST)')
         self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
         self._create_model_info_endpoint()
@@ -46,8 +54,10 @@ class ModelServer(object):
 
     def _create_prediction_endpoint(
             self,
-            input_validation=lambda data: (True, None),
+            to_numpy=True,
             data_loader=json_numpy_loader,
+            preprocessor=lambda x: x,
+            input_validation=lambda data: (True, None),
             postprocessor=make_serializable):
         """Create an endpoint to serve predictions.
 
@@ -66,7 +76,10 @@ class ModelServer(object):
         class Predictions(Resource):
             @staticmethod
             def post():
-                data = data_loader()
+                data = data_loader()  # read data from API request
+                data = preprocessor(data)  # preprocess data
+                data = np.array(data) if to_numpy else data  # convert to numpy
+
                 # sanity check using user defined callback (default is no check)
                 validation_pass, validation_reason = input_validation(data)
                 if not validation_pass:
