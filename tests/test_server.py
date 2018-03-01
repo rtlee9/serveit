@@ -222,3 +222,13 @@ class ModelServerTest(object):
     def test_get_app(self):
         """Make sure get_app method returns the same app."""
         self.assertEqual(self.server.get_app(), self.server.app)
+
+    def test_400_no_content_type(self):
+        """Check 400 response if no Content-Type header specified."""
+        response = self.app.post(
+            '/predictions',
+        )
+        self.assertEqual(response.status_code, 400)
+        response_body = json.loads(response.get_data())
+        self.assertEqual(response_body['message'], 'Unable to fetch data')
+        self.assertGreaterEqual(len(response_body['details']), 2)

@@ -9,6 +9,26 @@ from .log_utils import get_logger
 logger = get_logger(__name__)
 
 
+def exception_log_and_respond(exception, logger, message, status_code):
+    """Log an error and send jsonified respond."""
+    logger.error('{} exception: {}'.format(type(exception).__name__, exception))
+    return make_response(
+        message,
+        status_code,
+        dict(exception_type=type(exception).__name__, exception_message=str(exception)),
+    )
+
+
+def make_response(message, status_code, details=None):
+    """Make a jsonified response with specified message and status code."""
+    response_body = dict(message=message)
+    if details:
+        response_body['details'] = details
+    response = jsonify(response_body)
+    response.status_code = status_code
+    return response
+
+
 class ModelServer(object):
     """Easy deploy class."""
 
@@ -76,7 +96,12 @@ class ModelServer(object):
         class Predictions(Resource):
             @staticmethod
             def post():
-                data = data_loader()  # read data from API request
+                # read data from API request
+                try:
+                    data = data_loader()
+                except Exception as e:
+                    return exception_log_and_respond(e, logger, 'Unable to fetch data', 400)
+
                 data = preprocessor(data)  # preprocess data
                 data = np.array(data) if to_numpy else data  # convert to numpy
 
@@ -87,18 +112,14 @@ class ModelServer(object):
                     validation_message = 'Input validation failed with reason: {}'.format(validation_reason)
                     logger.error(validation_message)
                     logger.debug('Data: {}'.format(data))
-                    response = jsonify(dict(message=validation_message))
-                    response.status_code = 400
-                    return response
+                    return make_response(validation_message, 400)
 
                 try:
                     prediction = predict(data)
                 except Exception as e:
                     # log exception and return the message in a 500 response
-                    logger.error('{} exception: {}'.format(type(e).__name__, e))
-                    response = jsonify(dict(message=str(e)))
-                    response.status_code = 500
-                    return response
+                    logger.debug('Data: {}'.format(data))
+                    return exception_log_and_respond(e, logger, 'Unable to make prediction', 500)
                 logger.debug(prediction)
                 logger.debug('Predictions generated with shape {}'.format(prediction.shape))
                 return postprocessor(prediction)
