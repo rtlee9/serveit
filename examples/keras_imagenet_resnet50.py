@@ -8,6 +8,7 @@ from serveit.utils import make_serializable, get_bytes_to_image_callback
 
 from keras.applications.resnet50 import ResNet50
 from keras.applications.resnet50 import decode_predictions
+from keras.applications.resnet50 import preprocess_input
 
 from flask import request
 import requests
@@ -25,7 +26,7 @@ def loader():
     return response.content
 
 # get a bytes-to-image callback, resizing the image to 224x224 for ImageNet
-preprocessor = get_bytes_to_image_callback(image_dims=(224, 224))
+bytes_to_image = get_bytes_to_image_callback(image_dims=(224, 224))
 
 
 # define a postprocessor callback for the API to transform the model predictions
@@ -41,7 +42,7 @@ server = ModelServer(
     model,
     model.predict,
     data_loader=loader,
-    preprocessor=preprocessor,
+    preprocessor=[bytes_to_image, preprocess_input],
     postprocessor=postprocessor,
 )
 

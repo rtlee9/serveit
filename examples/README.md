@@ -58,6 +58,7 @@ model = ResNet50(weights='imagenet')
 Next we define methods for loading and preprocessing an image from a URL...
 ```python
 from keras.preprocessing import image
+from keras.applications.resnet50 import preprocess_input
 from flask import request
 import requests
 from serveit.utils import make_serializable, get_bytes_to_image_callback
@@ -71,7 +72,10 @@ def loader():
     return response.content
 
 # get a bytes-to-image callback, resizing the image to 224x224 for ImageNet
-preprocessor = get_bytes_to_image_callback(image_dims=(224, 224))
+bytes_to_image = get_bytes_to_image_callback(image_dims=(224, 224))
+
+# create a list of different preprocessors to chain multiple steps
+preprocessor = [bytes_to_image, preprocess_input]
 ```
 
 ... and one for postprocessing and serializing the model predictions for the API response:

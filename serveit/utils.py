@@ -50,7 +50,6 @@ def json_numpy_loader():
 def get_bytes_to_image_callback(image_dims=(224, 224)):
     """Return a callback to process image bytes for ImageNet."""
     from keras.preprocessing import image
-    from keras.applications.resnet50 import preprocess_input
     import numpy as np
     from PIL import Image
     from io import BytesIO
@@ -61,5 +60,5 @@ def get_bytes_to_image_callback(image_dims=(224, 224)):
         img = img.resize(image_dims, Image.ANTIALIAS)  # model requires 224x224 pixels
         x = image.img_to_array(img)  # convert image to numpy array
         x = np.expand_dims(x, axis=0)  # model expects dim 0 to be iterable across images
-        return preprocess_input(x)  # preprocess the image using keras fn
+        return x
     return preprocess_image_bytes
