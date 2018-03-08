@@ -14,7 +14,8 @@ class BostonKerasNNTest(unittest.TestCase, ModelServerTest):
         self.model = self.get_model(data.data.shape[1])
         super(BostonKerasNNTest, self)._setup(self.model, self.model.fit, data)
 
-    def get_model(self, input_dim):
+    @staticmethod
+    def get_model(input_dim):
         """Create and compile simple model."""
         from keras.models import Sequential
         from keras.layers import Dense
