@@ -17,6 +17,8 @@ def make_serializable(data):
         return data.tolist()
     except AttributeError:
         pass
+    except Exception as e:
+        logger.debug('{} exception ({}): {}'.format(type(e).__name__, e, data))
 
     # try serializing each child element
     if isinstance(data, dict):
