@@ -39,7 +39,8 @@ class ModelServer(object):
             input_validation=lambda data: (True, None),
             data_loader=json_numpy_loader,
             preprocessor=lambda x: x,
-            postprocessor=make_serializable):
+            postprocessor=make_serializable,
+            to_numpy=True):
         """Initialize class with prediction function.
 
         Arguments:
@@ -63,6 +64,7 @@ class ModelServer(object):
             input_validation=input_validation,
             preprocessor=preprocessor,
             postprocessor=postprocessor,
+            to_numpy=to_numpy,
         )
         logger.info('Model predictions registered to endpoint /predictions (available via POST)')
         self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
