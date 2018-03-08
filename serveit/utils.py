@@ -21,11 +21,12 @@ def make_serializable(data):
     # try serializing each child element
     if isinstance(data, dict):
         return {key: make_serializable(value) for key, value in data.items()}
-    if hasattr(data, '__iter__'):
-        try:
-            return [make_serializable(element) for element in data]
-        except Exception:
-            logger.debug('Could not serialize {}; converting to string'.format(data))
+    try:
+        return [make_serializable(element) for element in data]
+    except TypeError:  # not iterable
+        pass
+    except Exception:
+        logger.debug('Could not serialize {}; converting to string'.format(data))
 
     # last resort: convert to string
     return str(data)
