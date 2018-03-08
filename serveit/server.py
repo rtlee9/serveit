@@ -127,8 +127,10 @@ class ModelServer(object):
                     logger.debug('Data: {}'.format(data))
                     return exception_log_and_respond(e, logger, 'Unable to make prediction', 500)
                 logger.debug(prediction)
-                logger.debug('Predictions generated with shape {}'.format(prediction.shape))
-                return postprocessor(prediction)
+                try:
+                    return postprocessor(prediction)
+                except Exception as e:
+                    return exception_log_and_respond(e, logger, 'Postprocessing failed', 500)
 
         # map resource to endpoint
         self.api.add_resource(Predictions, '/predictions')
