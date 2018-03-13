@@ -80,7 +80,8 @@ class ModelServer(object):
             data_loader=json_numpy_loader,
             preprocessor=lambda x: x,
             input_validation=lambda data: (True, None),
-            postprocessor=make_serializable):
+            postprocessor=lambda x: x,
+            make_serializable_post=True):
         """Create an endpoint to serve predictions.
 
         Arguments:
@@ -128,7 +129,11 @@ class ModelServer(object):
                     return exception_log_and_respond(e, logger, 'Unable to make prediction', 500)
                 logger.debug(prediction)
                 try:
-                    return postprocessor(prediction)
+                    prediction = postprocessor(prediction)
+                    if make_serializable_post:
+                        return make_serializable(prediction)
+                    else:
+                        return prediction
                 except Exception as e:
                     return exception_log_and_respond(e, logger, 'Postprocessing failed', 500)
 
