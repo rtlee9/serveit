@@ -106,6 +106,11 @@ class ModelServerTest(object):
         """Add simple input validator and make sure it triggers."""
         # model input validator
         def feature_count_check(data):
+            try:
+                # convert PyTorch variables to numpy arrays
+                data = data.data.numpy()
+            except:
+                pass
             # check num dims
             if data.ndim != 2:
                 return False, 'Data should have two dimensions.'
