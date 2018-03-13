@@ -25,7 +25,7 @@ from serveit.server import ModelServer
 ModelServer(clf, clf.predict).serve()
 ```
 
-Your new API is now accepting `POST` requests at `localhost:5000/predictions`! Please see the [examples](examples) directory for additional usage.
+Your new API is now accepting `POST` requests at `localhost:5000/predictions`! Please see the [examples](examples) directory for examples across domains (e.g., regression, image classification), including live examples.
 
 ### Supported libraries
 * Scikit-Learn
