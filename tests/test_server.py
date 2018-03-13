@@ -13,7 +13,7 @@ class ModelServerTest(object):
     also inherit from `unittest.TestCase` to ensure tests are executed.
     """
 
-    def _setup(self, model, fit, data):
+    def _setup(self, model, fit, data, predict=None):
         """Set up method to be called before each unit test.
 
         Arguments:
@@ -21,7 +21,8 @@ class ModelServerTest(object):
         """
         self.data = data
         fit(self.data.data, self.data.target)
-        self.server = ModelServer(self.model, self.model.predict)
+        self.predict = predict or self.model.predict
+        self.server = ModelServer(self.model, self.predict)
         self.app = self.server.app.test_client()
 
     @staticmethod
@@ -116,7 +117,7 @@ class ModelServerTest(object):
             return True, None
 
         # set up test server
-        server = ModelServer(self.model, self.model.predict, feature_count_check)
+        server = ModelServer(self.model, self.predict, feature_count_check)
         app = server.app.test_client()
 
         # generate sample data
@@ -151,7 +152,7 @@ class ModelServerTest(object):
             return np.array(data['data'])
 
         # create test client
-        server = ModelServer(self.model, self.model.predict, data_loader=read_json_from_dict)
+        server = ModelServer(self.model, self.predict, data_loader=read_json_from_dict)
         app = server.app.test_client()
 
         # generate sample data, and wrap in dict keyed by 'data'
@@ -175,7 +176,7 @@ class ModelServerTest(object):
     def test_preprocessing(self):
         """Test predictions endpoint with custom preprocessing callback."""
         # create test client with postprocessor that unraps data from a dict as the value of the 'data' key
-        server = ModelServer(self.model, self.model.predict, preprocessor=lambda d: d['data'])
+        server = ModelServer(self.model, self.predict, preprocessor=lambda d: d['data'])
         app = server.app.test_client()
 
         # generate sample data, and wrap in dict keyed by 'data'
@@ -201,7 +202,7 @@ class ModelServerTest(object):
         # create test client with postprocessor that unraps data from a dict as the value of the 'data' key
         server = ModelServer(
             self.model,
-            self.model.predict,
+            self.predict,
             preprocessor=[lambda d: d['data2'], lambda d: d['data']]
         )
         app = server.app.test_client()
@@ -227,7 +228,7 @@ class ModelServerTest(object):
     def test_postprocessing(self):
         """Test predictions endpoint with custom postprocessing callback."""
         # create test client with postprocessor that wraps predictions in a dictionary
-        server = ModelServer(self.model, self.model.predict, postprocessor=lambda x: dict(prediction=x.tolist()))
+        server = ModelServer(self.model, self.predict, postprocessor=lambda x: dict(prediction=x.tolist()))
         app = server.app.test_client()
 
         # generate sample data
