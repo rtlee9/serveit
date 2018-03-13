@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 def exception_log_and_respond(exception, logger, message, status_code):
     """Log an error and send jsonified respond."""
-    logger.error('{} exception: {}'.format(type(exception).__name__, exception))
+    logger.error(message, exc_info=True)
     return make_response(
         message,
         status_code,
