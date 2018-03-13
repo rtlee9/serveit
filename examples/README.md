@@ -78,17 +78,9 @@ bytes_to_image = get_bytes_to_image_callback(image_dims=(224, 224))
 preprocessor = [bytes_to_image, preprocess_input]
 ```
 
-... and one for postprocessing and serializing the model predictions for the API response:
+... and import a decoder for postprocessing the model predictions for the API response:
 ```python
 from keras.applications.resnet50 import decode_predictions
-
-# define a postprocessor callback for the API to transform the model predictions
-def postprocessor(predictions):
-    """Decode predictions and serialize."""
-    # decode all class predictions and take top 3
-    top_predictions = decode_predictions(predictions, top=3)[0]
-    # serialize predictions for JSON response
-    return make_serializable(top_predictions)
 ```
 
 And now we're ready to start serving our image classifier:
@@ -100,7 +92,7 @@ server = ModelServer(
     model.predict,
     data_loader=loader,
     preprocessor=preprocessor,
-    postprocessor=postprocessor,
+    postprocessor=decode_predictions,
 )
 
 # start API
@@ -114,11 +106,13 @@ curl -XPOST 'localhost:5000/predictions?url=https://images.pexels.com/photos/969
 # [["n02123045", "tabby", 0.6266211867332458], ["n02124075", "Egyptian_cat", 0.1539127230644226], ["n02123159", "tiger_cat", 0.09456271678209305]]
 ```
 
-![cat picture](img/airplane.jpg)
+![plane picture](img/airplane.jpg)
 ```bash
 curl -XPOST 'localhost:5000/predictions?url=https://images.pexels.com/photos/67807/plane-aircraft-take-off-sky-67807.jpeg'
 # [["n02690373", "airliner", 0.4983633756637573], ["n04592741", "wing", 0.2677533030509949], ["n04552348", "warplane", 0.21882124245166779]]
 ```
+
+You can interact with a live DenseNet121 demo server at [https://imagenet-keras.ryanlee.io/predictions](https://imagenet-keras.ryanlee.io/predictions) (source code [here](https://github.com/rtlee9/serveit-demo-imagenet-keras/)).
 
 ## Advanced example: serving with gunicorn
 If you have a preference for a specific WSGI HTTP server, you can easily retrieve the underlying app from the server to serve separately. Once you've initialized the ModelServer class, fetch the underlying app in the global scope of a Python script like so:

@@ -4,7 +4,7 @@ Prediction endpoint, served at `/predictions` takes a URL pointing to an image
 and returns a list of class probabilities.
 """
 from serveit.server import ModelServer
-from serveit.utils import make_serializable, get_bytes_to_image_callback
+from serveit.utils import get_bytes_to_image_callback
 
 from keras.applications.resnet50 import ResNet50
 from keras.applications.resnet50 import decode_predictions
@@ -28,22 +28,13 @@ def loader():
 # get a bytes-to-image callback, resizing the image to 224x224 for ImageNet
 bytes_to_image = get_bytes_to_image_callback(image_dims=(224, 224))
 
-
-# define a postprocessor callback for the API to transform the model predictions
-def postprocessor(predictions):
-    """Decode predictions and serialize."""
-    # decode all class predictions and take top 3
-    top_predictions = decode_predictions(predictions, top=3)[0]
-    # serialize predictions for JSON response
-    return make_serializable(top_predictions)
-
 # deploy model to a ModelServer
 server = ModelServer(
     model,
     model.predict,
     data_loader=loader,
     preprocessor=[bytes_to_image, preprocess_input],
-    postprocessor=postprocessor,
+    postprocessor=decode_predictions,
 )
 
 # start API
