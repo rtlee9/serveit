@@ -129,11 +129,19 @@ class ModelServer(object):
                     return exception_log_and_respond(e, logger, 'Unable to make prediction', 500)
                 logger.debug(prediction)
                 try:
-                    prediction = postprocessor(prediction)
+                    # preprocess data
+                    if hasattr(postprocessor, '__iter__'):
+                        for postprocessor_step in postprocessor:
+                            prediction = postprocessor_step(prediction)
+                    else:
+                        prediction = postprocessor(prediction)
+
+                    # cast to serializable types
                     if make_serializable_post:
                         return make_serializable(prediction)
                     else:
                         return prediction
+
                 except Exception as e:
                     return exception_log_and_respond(e, logger, 'Postprocessing failed', 500)
 
