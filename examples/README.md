@@ -78,17 +78,9 @@ bytes_to_image = get_bytes_to_image_callback(image_dims=(224, 224))
 preprocessor = [bytes_to_image, preprocess_input]
 ```
 
-... and one for postprocessing and serializing the model predictions for the API response:
+... and import a decoder for postprocessing the model predictions for the API response:
 ```python
 from keras.applications.resnet50 import decode_predictions
-
-# define a postprocessor callback for the API to transform the model predictions
-def postprocessor(predictions):
-    """Decode predictions and serialize."""
-    # decode all class predictions and take top 3
-    top_predictions = decode_predictions(predictions, top=3)[0]
-    # serialize predictions for JSON response
-    return make_serializable(top_predictions)
 ```
 
 And now we're ready to start serving our image classifier:
@@ -100,7 +92,7 @@ server = ModelServer(
     model.predict,
     data_loader=loader,
     preprocessor=preprocessor,
-    postprocessor=postprocessor,
+    postprocessor=decode_predictions,
 )
 
 # start API
