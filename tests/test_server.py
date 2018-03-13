@@ -13,7 +13,7 @@ class ModelServerTest(object):
     also inherit from `unittest.TestCase` to ensure tests are executed.
     """
 
-    def _setup(self, model, fit, data):
+    def _setup(self, model, fit, data, predict=None, **kwargs):
         """Set up method to be called before each unit test.
 
         Arguments:
@@ -21,7 +21,9 @@ class ModelServerTest(object):
         """
         self.data = data
         fit(self.data.data, self.data.target)
-        self.server = ModelServer(self.model, self.model.predict)
+        self.predict = predict or self.model.predict
+        self.server_kwargs = kwargs
+        self.server = ModelServer(self.model, self.predict, **kwargs)
         self.app = self.server.app.test_client()
 
     @staticmethod
@@ -104,6 +106,11 @@ class ModelServerTest(object):
         """Add simple input validator and make sure it triggers."""
         # model input validator
         def feature_count_check(data):
+            try:
+                # convert PyTorch variables to numpy arrays
+                data = data.data.numpy()
+            except:
+                pass
             # check num dims
             if data.ndim != 2:
                 return False, 'Data should have two dimensions.'
@@ -116,7 +123,7 @@ class ModelServerTest(object):
             return True, None
 
         # set up test server
-        server = ModelServer(self.model, self.model.predict, feature_count_check)
+        server = ModelServer(self.model, self.predict, feature_count_check, **self.server_kwargs)
         app = server.app.test_client()
 
         # generate sample data
@@ -151,7 +158,7 @@ class ModelServerTest(object):
             return np.array(data['data'])
 
         # create test client
-        server = ModelServer(self.model, self.model.predict, data_loader=read_json_from_dict)
+        server = ModelServer(self.model, self.predict, data_loader=read_json_from_dict, **self.server_kwargs)
         app = server.app.test_client()
 
         # generate sample data, and wrap in dict keyed by 'data'
@@ -172,10 +179,26 @@ class ModelServerTest(object):
             pred_pct_diff = np.array(response_data).mean() / self.data.target.mean() - 1
             self.assertAlmostEqual(pred_pct_diff / 1e4, 0, places=1)
 
+    def _update_kwargs_item(self, item, key_name, position='first'):
+        """Prepend a method to the existing preprocessing chain, add to self's kwargs and return."""
+        kwargs = self.server_kwargs
+        if key_name in self.server_kwargs:
+            existing_items = kwargs[key_name]
+            if not isinstance(existing_items, (list, tuple)):
+                existing_items = [existing_items]
+        else:
+            existing_items = []
+        if position == 'first':
+            kwargs[key_name] = [item] + existing_items
+        if position == 'last':
+            kwargs[key_name] = existing_items + [item]
+        return kwargs
+
     def test_preprocessing(self):
         """Test predictions endpoint with custom preprocessing callback."""
         # create test client with postprocessor that unraps data from a dict as the value of the 'data' key
-        server = ModelServer(self.model, self.model.predict, preprocessor=lambda d: d['data'])
+        kwargs = self._update_kwargs_item(lambda d: d['data'], 'preprocessor')
+        server = ModelServer(self.model, self.predict, **kwargs)
         app = server.app.test_client()
 
         # generate sample data, and wrap in dict keyed by 'data'
@@ -199,10 +222,12 @@ class ModelServerTest(object):
     def test_preprocessing_list(self):
         """Test predictions endpoint with chained preprocessing callbacks."""
         # create test client with postprocessor that unraps data from a dict as the value of the 'data' key
+        kwargs = self._update_kwargs_item(lambda d: d['data'], 'preprocessor')
+        kwargs['preprocessor'] = [lambda d: d['data2']] + kwargs['preprocessor']
         server = ModelServer(
             self.model,
-            self.model.predict,
-            preprocessor=[lambda d: d['data2'], lambda d: d['data']]
+            self.predict,
+            **kwargs
         )
         app = server.app.test_client()
 
@@ -227,7 +252,8 @@ class ModelServerTest(object):
     def test_postprocessing(self):
         """Test predictions endpoint with custom postprocessing callback."""
         # create test client with postprocessor that wraps predictions in a dictionary
-        server = ModelServer(self.model, self.model.predict, postprocessor=lambda x: dict(prediction=x.tolist()))
+        kwargs = self._update_kwargs_item(lambda x: dict(prediction=x.tolist()), 'postprocessor', 'last')
+        server = ModelServer(self.model, self.predict, **kwargs)
         app = server.app.test_client()
 
         # generate sample data
