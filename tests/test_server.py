@@ -13,7 +13,7 @@ class ModelServerTest(object):
     also inherit from `unittest.TestCase` to ensure tests are executed.
     """
 
-    def _setup(self, model, fit, data, predict=None):
+    def _setup(self, model, fit, data, predict=None, **kwargs):
         """Set up method to be called before each unit test.
 
         Arguments:
@@ -22,7 +22,7 @@ class ModelServerTest(object):
         self.data = data
         fit(self.data.data, self.data.target)
         self.predict = predict or self.model.predict
-        self.server = ModelServer(self.model, self.predict)
+        self.server = ModelServer(self.model, self.predict, **kwargs)
         self.app = self.server.app.test_client()
 
     @staticmethod
