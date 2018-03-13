@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 def exception_log_and_respond(exception, logger, message, status_code):
     """Log an error and send jsonified respond."""
-    logger.error('{} exception: {}'.format(type(exception).__name__, exception))
+    logger.error(message, exc_info=True)
     return make_response(
         message,
         status_code,
@@ -39,7 +39,8 @@ class ModelServer(object):
             input_validation=lambda data: (True, None),
             data_loader=json_numpy_loader,
             preprocessor=lambda x: x,
-            postprocessor=make_serializable):
+            postprocessor=make_serializable,
+            to_numpy=True):
         """Initialize class with prediction function.
 
         Arguments:
@@ -63,6 +64,7 @@ class ModelServer(object):
             input_validation=input_validation,
             preprocessor=preprocessor,
             postprocessor=postprocessor,
+            to_numpy=to_numpy,
         )
         logger.info('Model predictions registered to endpoint /predictions (available via POST)')
         self.app.logger.setLevel(logger.level)  # TODO: separate configuration for API loglevel
@@ -78,7 +80,8 @@ class ModelServer(object):
             data_loader=json_numpy_loader,
             preprocessor=lambda x: x,
             input_validation=lambda data: (True, None),
-            postprocessor=make_serializable):
+            postprocessor=lambda x: x,
+            make_serializable_post=True):
         """Create an endpoint to serve predictions.
 
         Arguments:
@@ -125,8 +128,22 @@ class ModelServer(object):
                     logger.debug('Data: {}'.format(data))
                     return exception_log_and_respond(e, logger, 'Unable to make prediction', 500)
                 logger.debug(prediction)
-                logger.debug('Predictions generated with shape {}'.format(prediction.shape))
-                return postprocessor(prediction)
+                try:
+                    # preprocess data
+                    if hasattr(postprocessor, '__iter__'):
+                        for postprocessor_step in postprocessor:
+                            prediction = postprocessor_step(prediction)
+                    else:
+                        prediction = postprocessor(prediction)
+
+                    # cast to serializable types
+                    if make_serializable_post:
+                        return make_serializable(prediction)
+                    else:
+                        return prediction
+
+                except Exception as e:
+                    return exception_log_and_respond(e, logger, 'Postprocessing failed', 500)
 
         # map resource to endpoint
         self.api.add_resource(Predictions, '/predictions')

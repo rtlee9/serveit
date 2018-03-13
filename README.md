@@ -30,10 +30,10 @@ Your new API is now accepting `POST` requests at `localhost:5000/predictions`! P
 ### Supported libraries
 * Scikit-Learn
 * Keras
+* PyTorch
 
 ### Coming soon:
 * TensorFlow
-* PyTorch
 
 ## Building
 You can build locally with: `python setup.py`

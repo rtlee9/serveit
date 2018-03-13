@@ -5,5 +5,5 @@ python:
 install:
   - pip install -r requirements.txt
 script:
-  - python -m pytest tests --ignore tests/keras --ignore tests/test_callback_utils.py
+  - python -m pytest tests --ignore tests/keras --ignore tests/pytorch --ignore tests/test_callback_utils.py
 after_script: ./coverage.sh
