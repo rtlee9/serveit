@@ -114,7 +114,7 @@ curl -XPOST 'localhost:5000/predictions?url=https://images.pexels.com/photos/969
 # [["n02123045", "tabby", 0.6266211867332458], ["n02124075", "Egyptian_cat", 0.1539127230644226], ["n02123159", "tiger_cat", 0.09456271678209305]]
 ```
 
-![cat picture](img/airplane.jpg)
+![plane picture](img/airplane.jpg)
 ```bash
 curl -XPOST 'localhost:5000/predictions?url=https://images.pexels.com/photos/67807/plane-aircraft-take-off-sky-67807.jpeg'
 # [["n02690373", "airliner", 0.4983633756637573], ["n04592741", "wing", 0.2677533030509949], ["n04552348", "warplane", 0.21882124245166779]]
