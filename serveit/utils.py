@@ -59,7 +59,10 @@ def get_bytes_to_image_callback(image_dims=(224, 224)):
 
     def preprocess_image_bytes(data_bytes):
         """Process image bytes for ImageNet."""
-        img = Image.open(BytesIO(data_bytes))  # open image
+        try:
+            img = Image.open(BytesIO(data_bytes))  # open image
+        except OSError as e:
+            raise ValueError('Please provide a raw image') from e
         img = img.resize(image_dims, Image.ANTIALIAS)  # model requires 224x224 pixels
         x = image.img_to_array(img)  # convert image to numpy array
         x = np.expand_dims(x, axis=0)  # model expects dim 0 to be iterable across images
