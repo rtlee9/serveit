@@ -105,12 +105,15 @@ class ModelServer(object):
                 except Exception as e:
                     return exception_log_and_respond(e, logger, 'Unable to fetch data', 400)
 
-                if hasattr(preprocessor, '__iter__'):
-                    for preprocessor_step in preprocessor:
-                        data = preprocessor_step(data)
-                else:
-                    data = preprocessor(data)  # preprocess data
-                data = np.array(data) if to_numpy else data  # convert to numpy
+                try:
+                    if hasattr(preprocessor, '__iter__'):
+                        for preprocessor_step in preprocessor:
+                            data = preprocessor_step(data)
+                    else:
+                        data = preprocessor(data)  # preprocess data
+                    data = np.array(data) if to_numpy else data  # convert to numpy
+                except Exception as e:
+                    return exception_log_and_respond(e, logger, 'Could not preprocess data', 400)
 
                 # sanity check using user defined callback (default is no check)
                 validation_pass, validation_reason = input_validation(data)
