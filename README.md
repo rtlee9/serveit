@@ -22,6 +22,10 @@ ModelServer(clf, clf.predict).serve()
 
 Your new API is now accepting `POST` requests at `localhost:5000/predictions`! Please see the [examples](examples) directory for detailed examples across domains (e.g., regression, image classification), including live examples.
 
+Please consider buying me a coffee if you like my work:
+
+<a href="https://www.buymeacoffee.com/6Ii7vzL" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+
 #### Features
 Current ServeIt features include:
 
