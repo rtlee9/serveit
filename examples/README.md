@@ -63,8 +63,8 @@ from flask import request
 import requests
 from serveit.utils import make_serializable, get_bytes_to_image_callback
 
-# define a loader callback for the API to fetch the relevant data and a
-# preprocessor callback to convert to a format expected by the prediction function
+# define a loader callback for the API to fetch the relevant data and
+# preprocessor callbacks to map to a format expected by the model
 def loader():
     """Load image from URL, and preprocess for Resnet."""
     url = request.args.get('url')  # read image URL as a request URL param
@@ -85,8 +85,9 @@ from keras.applications.resnet50 import decode_predictions
 
 And now we're ready to start serving our image classifier:
 ```python
-# deploy model to a ModelServer
 from serveit.server import ModelServer
+
+# deploy model to a ModelServer
 server = ModelServer(
     model,
     model.predict,
@@ -95,7 +96,7 @@ server = ModelServer(
     postprocessor=decode_predictions,
 )
 
-# start API
+# start serving
 server.serve()
 ```
 
