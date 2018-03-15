@@ -62,7 +62,7 @@ def get_bytes_to_image_callback(image_dims=(224, 224)):
         try:
             img = Image.open(BytesIO(data_bytes))  # open image
         except OSError as e:
-            raise ValueError('Please provide a raw image') from e
+            raise ValueError('Please provide a raw image')
         img = img.resize(image_dims, Image.ANTIALIAS)  # model requires 224x224 pixels
         x = image.img_to_array(img)  # convert image to numpy array
         x = np.expand_dims(x, axis=0)  # model expects dim 0 to be iterable across images
