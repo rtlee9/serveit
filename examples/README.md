@@ -28,6 +28,7 @@ server.serve()
 ```
 
 Behold:
+
 ```bash
 curl -XPOST 'localhost:5000/predictions'\
     -H "Content-Type: application/json"\
@@ -103,14 +104,14 @@ server.serve()
 Behold:
 ![cat picture](img/cat.jpg)
 ```bash
-curl -XPOST 'localhost:5000/predictions?url=https://images.pexels.com/photos/96938/pexels-photo-96938.jpeg'
-# [["n02123045", "tabby", 0.6266211867332458], ["n02124075", "Egyptian_cat", 0.1539127230644226], ["n02123159", "tiger_cat", 0.09456271678209305]]
+curl -XPOST 'localhost:5000/predictions?url=https://cdn.pixabay.com/photo/2017/11/14/13/06/kitty-2948404_640.jpg'
+# [[["n02123159", "tiger_cat", 0.598746120929718], ["n02127052", "lynx", 0.32807421684265137], ["n02123045", "tabby", 0.042475175112485886]]]
 ```
 
 ![plane picture](img/airplane.jpg)
 ```bash
-curl -XPOST 'localhost:5000/predictions?url=https://images.pexels.com/photos/67807/plane-aircraft-take-off-sky-67807.jpeg'
-# [["n02690373", "airliner", 0.4983633756637573], ["n04592741", "wing", 0.2677533030509949], ["n04552348", "warplane", 0.21882124245166779]]
+curl -XPOST 'localhost:5000/predictions?url=https://cdn.pixabay.com/photo/2012/06/28/08/26/plane-50893_640.jpg'
+# [[["n02690373", "airliner", 0.5599709749221802], ["n04592741", "wing", 0.286420077085495], ["n04552348", "warplane", 0.14331381022930145]]]
 ```
 
 You can interact with a live DenseNet121 demo server at `https://imagenet-keras.ryanlee.io/predictions` (source code and sample requests [here](https://github.com/rtlee9/serveit-demo-imagenet-keras/)).
