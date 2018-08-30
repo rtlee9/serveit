@@ -114,7 +114,7 @@ curl -XPOST 'localhost:5000/predictions?url=https://cdn.pixabay.com/photo/2012/0
 # [[["n02690373", "airliner", 0.5599709749221802], ["n04592741", "wing", 0.286420077085495], ["n04552348", "warplane", 0.14331381022930145]]]
 ```
 
-You can interact with a live DenseNet121 demo server at `https://imagenet-keras.ryanlee.io/predictions` (source code and sample requests [here](https://github.com/rtlee9/serveit-demo-imagenet-keras/)).
+You can interact with a live DenseNet121 demo server at `https://imagenet-keras.ryanlee.site/predictions` (source code and sample requests [here](https://github.com/rtlee9/serveit-demo-imagenet-keras/)).
 
 ## Advanced example: serving with gunicorn
 If you have a preference for a specific WSGI HTTP server, you can easily retrieve the underlying app from the server to serve separately. Once you've initialized the ModelServer class, fetch the underlying app in the global scope of a Python script like so:
